@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playgic Story — 始まりと、これから</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #06060f;
+      --bg2:     #0d0d1a;
+      --bg3:     #111125;
+      --accent:  #7c5cfc;
+      --accent2: #a78bfa;
+      --cyan:    #22d3ee;
+      --green:   #10b981;
+      --yellow:  #f59e0b;
+      --white:   #f1f0ff;
+      --gray:    #8b8aa8;
+      --border:  rgba(124,92,252,.18);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', 'Helvetica Neue', 'Hiragino Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* グリッドノイズ背景 */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(124,92,252,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,92,252,.035) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 60px;
+      background: rgba(6,6,15,.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-size: 14px; font-weight: 800; letter-spacing: .2em;
+      background: linear-gradient(135deg, var(--accent2), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-back {
+      font-size: 13px; color: var(--gray); text-decoration: none;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--white); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 80px 40px;
+      overflow: hidden;
+    }
+
+    /* グロー */
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,92,252,.15) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: .3em;
+      text-transform: uppercase; color: var(--accent2);
+      margin-bottom: 28px;
+      position: relative; z-index: 1;
+    }
+
+    .hero-title {
+      font-size: clamp(48px, 8vw, 88px);
+      font-weight: 900; letter-spacing: -.03em; line-height: 1;
+      position: relative; z-index: 1;
+      margin-bottom: 32px;
+    }
+
+    .hero-title .grad {
+      background: linear-gradient(135deg, var(--white) 0%, var(--accent2) 50%, var(--cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hero-philosophy {
+      position: relative; z-index: 1;
+      max-width: 560px;
+      border-left: 2px solid var(--accent);
+      padding: 20px 28px;
+      text-align: left;
+      margin: 0 auto 48px;
+      background: rgba(124,92,252,.06);
+      border-radius: 0 12px 12px 0;
+    }
+
+    .hero-philosophy p {
+      font-size: 17px; line-height: 1.9; color: var(--white);
+      font-weight: 300;
+    }
+
+    .hero-philosophy p strong {
+      color: var(--accent2); font-weight: 700;
+    }
+
+    .hero-scroll {
+      position: relative; z-index: 1;
+      font-size: 12px; color: var(--gray); letter-spacing: .15em;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    /* ── セクション共通 ── */
+    section {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto;
+      padding: 100px 40px;
+    }
+
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .3em;
+      text-transform: uppercase; color: var(--accent2);
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800; letter-spacing: -.02em;
+      margin-bottom: 16px; line-height: 1.2;
+    }
+
+    .section-desc {
+      font-size: 15px; color: var(--gray); line-height: 1.8;
+      max-width: 600px; margin-bottom: 56px;
+    }
+
+    /* ── タイムライン ── */
+    .timeline { position: relative; }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 20px; top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--border) 10%, var(--border) 90%, transparent);
+    }
+
+    .tl-item {
+      display: flex; gap: 32px;
+      padding: 0 0 56px 0;
+      position: relative;
+    }
+
+    .tl-item:last-child { padding-bottom: 0; }
+
+    .tl-left {
+      flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center;
+      padding-top: 4px;
+    }
+
+    .tl-dot {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      position: relative; z-index: 1;
+    }
+
+    .tl-dot.milestone {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 20px rgba(124,92,252,.5);
+    }
+
+    .tl-dot.event {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+    }
+
+    .tl-dot.now {
+      background: linear-gradient(135deg, var(--cyan), var(--accent2));
+      box-shadow: 0 0 24px rgba(34,211,238,.4);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 24px rgba(34,211,238,.4); }
+      50% { box-shadow: 0 0 36px rgba(34,211,238,.6); }
+    }
+
+    .tl-body { flex: 1; padding-top: 8px; }
+
+    .tl-date {
+      font-size: 11px; font-weight: 700; letter-spacing: .15em;
+      color: var(--accent2); margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .tl-title {
+      font-size: 20px; font-weight: 800;
+      margin-bottom: 10px; line-height: 1.3;
+    }
+
+    .tl-text {
+      font-size: 14px; color: var(--gray); line-height: 1.8;
+      margin-bottom: 14px;
+    }
+
+    .tl-tags {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+
+    .tag {
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+    }
+
+    .tag-purple { background: rgba(124,92,252,.15); color: var(--accent2); border: 1px solid rgba(124,92,252,.3); }
+    .tag-green  { background: rgba(16,185,129,.12);  color: var(--green);   border: 1px solid rgba(16,185,129,.3); }
+    .tag-cyan   { background: rgba(34,211,238,.1);   color: var(--cyan);    border: 1px solid rgba(34,211,238,.25); }
+    .tag-yellow { background: rgba(245,158,11,.1);   color: var(--yellow);  border: 1px solid rgba(245,158,11,.25); }
+
+    /* ── 3本柱 ── */
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 700px) { .pillars { grid-template-columns: 1fr; } }
+
+    .pillar {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 18px; padding: 28px 24px;
+      position: relative; overflow: hidden;
+      transition: all .3s;
+    }
+
+    .pillar:hover {
+      transform: translateY(-4px);
+      border-color: rgba(124,92,252,.4);
+      box-shadow: 0 12px 40px rgba(124,92,252,.15);
+    }
+
+    .pillar::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--pillar-color, var(--accent));
+    }
+
+    .pillar-icon { font-size: 32px; margin-bottom: 16px; }
+    .pillar-name { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+    .pillar-role {
+      font-size: 12px; font-weight: 600;
+      color: var(--accent2); margin-bottom: 10px; letter-spacing: .05em;
+    }
+    .pillar-desc { font-size: 13px; color: var(--gray); line-height: 1.7; }
+
+    /* ── チーム ── */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 700px) { .team-grid { grid-template-columns: 1fr; } }
+
+    .member-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 18px; padding: 28px 24px;
+      text-align: center;
+      transition: all .3s;
+    }
+
+    .member-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(124,92,252,.12);
+    }
+
+    .member-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin: 0 auto 16px;
+    }
+
+    .av-hikaru { background: rgba(245,158,11,.12); border: 2px solid rgba(245,158,11,.3); }
+    .av-kuro   { background: rgba(124,92,252,.12); border: 2px solid rgba(124,92,252,.3); }
+    .av-angie  { background: rgba(34,211,238,.1);  border: 2px solid rgba(34,211,238,.25); }
+    .av-gemini { background: rgba(59,130,246,.1);  border: 2px solid rgba(59,130,246,.25); }
+    .av-gpt    { background: rgba(16,185,129,.1);  border: 2px solid rgba(16,185,129,.25); }
+
+    .member-name { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+    .member-title { font-size: 12px; color: var(--accent2); font-weight: 600; margin-bottom: 10px; }
+    .member-desc { font-size: 12px; color: var(--gray); line-height: 1.7; }
+
+    /* ── 未来セクション ── */
+    .future-card {
+      background: linear-gradient(135deg, rgba(124,92,252,.12) 0%, rgba(34,211,238,.07) 100%);
+      border: 1px solid rgba(124,92,252,.35);
+      border-radius: 20px; padding: 48px 40px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+
+    .future-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--cyan));
+    }
+
+    .future-year {
+      font-size: 64px; font-weight: 900; letter-spacing: -.04em;
+      background: linear-gradient(135deg, var(--accent2), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 8px; line-height: 1;
+    }
+
+    .future-label { font-size: 14px; color: var(--gray); margin-bottom: 32px; }
+
+    .milestones {
+      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+    }
+
+    .ms-item { text-align: center; }
+    .ms-year { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 4px; }
+    .ms-text { font-size: 14px; color: var(--white); font-weight: 600; }
+    .ms-sub  { font-size: 11px; color: var(--gray); margin-top: 2px; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 60px 40px;
+      border-top: 1px solid var(--border);
+      color: var(--gray); font-size: 13px;
+    }
+
+    footer strong { color: var(--accent2); }
+
+    /* ── セパレーター ── */
+    .sep {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto;
+      padding: 0 40px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">PLAYGIC</div>
+  <a href="index.html" class="nav-back">← Tools Hub</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">The Playgic Story</div>
+  <h1 class="hero-title">
+    <span class="grad">遊んでたら、</span><br>
+    <span class="grad">お金が増えた。</span>
+  </h1>
+  <div class="hero-philosophy">
+    <p>
+      戦略とか言うと大げさやけど、<br>
+      やってることはシンプルで——<br>
+      <strong>おもろいと思ったことを、全部やった。</strong><br>
+      気づいたら、それが仕組みになってた。
+    </p>
+  </div>
+  <div class="hero-scroll">↓ scroll</div>
+</div>
+
+<div class="sep"></div>
+
+<!-- 誕生の背景 -->
+<section>
+  <div class="section-label">Origin</div>
+  <h2 class="section-title">別に、最初から計画してたわけじゃない。</h2>
+  <p class="section-desc">
+    レンズが好きで、株が好きで、AIと話すのが好きだった。
+    それを全部つなげたら——気づいたら<strong style="color:var(--white)">組織になってた。</strong>
+    これは「頑張った話」じゃなくて、「遊んでたら転がってった話」だ。
+  </p>
+
+  <!-- タイムライン -->
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-dot milestone">🌱</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-date">2026年5月24日</div>
+        <div class="tl-title">「なんか、会社っぽくない？」</div>
+        <div class="tl-text">
+          AIと話しながら投資の作戦を考えてたら、いつの間にか組織の話になってた。
+          名前をつけることにした——Playgic。
+          Play（遊び）× Logic（論理）× Magic（魔法）。
+          大げさかもしれんけど、これがいちばんしっくりきた。
+        </div>
+        <div class="tl-tags">
+          <span class="tag tag-purple">Playgic 命名</span>
+          <span class="tag tag-green">総資産 ¥1,778万</span>
+          <span class="tag tag-purple">クロ（CEO）就任</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-dot event">💡</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-date">2026年5月25日</div>
+        <div class="tl-title">「投資の判断、そのままコンテンツにならない？」</div>
+        <div class="tl-text">
+          証券担保ローンで¥50万を調達して、NASDAQ100を買おうとしてた。
+          その判断プロセスをクロと話してたら——「これ、そのままYouTubeになるやん」ってなった。
+          同じ行動で2回稼ぐ。これがPlaygicの一番おもろい発見だった。
+        </div>
+        <div class="tl-tags">
+          <span class="tag tag-green">証券担保ローン ¥50万 調達</span>
+          <span class="tag tag-cyan">掛け算戦略 発見</span>
+          <span class="tag tag-yellow">eBay 実験開始決定</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-dot event">🎙</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-date">2026年5月26日</div>
+        <div class="tl-title">ウエルシアで、こっそり録音した。</div>
+        <div class="tl-text">
+          YouTube 1本目の収録場所はドラッグストアの駐車場だった。
+          顔も出さない、スタジオもない。スマホ一本で録って、CapCutで編集した。
+          「ちゃんとやろう」より「とりあえずやろう」が、Playgicのやり方だ。
+        </div>
+        <div class="tl-tags">
+          <span class="tag tag-cyan">1本目 収録完了</span>
+          <span class="tag tag-purple">顔なし・声あり 確定</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-dot event">🤖</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-date">2026年5月30日 — 午前</div>
+        <div class="tl-title">AIが、仕入れを探してくれるようになった。</div>
+        <div class="tl-text">
+          「ヤフオクを自動で巡回して、儲かるレンズだけ通知してくれるやつ作れない？」
+          ——クロとアンジー（Google AI）と3人で作ったら、1日で動いた。
+          eBayの仕入れ判断を、もうひとりのAIに任せることにした。
+        </div>
+        <div class="tl-tags">
+          <span class="tag tag-green">eBayエージェント 完成</span>
+          <span class="tag tag-green">Gmail通知 成功</span>
+          <span class="tag tag-purple">アンジー 参加</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-dot event">🐑</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-date">2026年5月30日 — 夜</div>
+        <div class="tl-title">Rebel Sheep、世界に出た。</div>
+        <div class="tl-text">
+          チャンネル名は「Rebel Sheep / 自由とレバレッジ」。
+          群れに従わない羊——借金で資産を作ることを、全部見せると決めた。
+          登録者1人から始まった。それでいい。全員そこから始まるんだから。
+        </div>
+        <div class="tl-tags">
+          <span class="tag tag-cyan">@rebelsheepjp 開設</span>
+          <span class="tag tag-yellow">1本目 公開 🔥</span>
+          <span class="tag tag-purple">登録者 1人（自分）</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-dot now">📍</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-date">今ここ</div>
+        <div class="tl-title">まだ始まったばかり。でも、揃ってる。</div>
+        <div class="tl-text">
+          投資・eBay・YouTube——3つの遊び場が、全部動き始めた。
+          派手な実績はまだない。でも仕組みは揃った。
+          あとはただ、続けるだけだ。
+        </div>
+        <div class="tl-tags">
+          <span class="tag tag-green">総資産 ¥1,931万</span>
+          <span class="tag tag-purple">3本柱 稼働中</span>
+          <span class="tag tag-cyan">Phase 1 進行中</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- 3本柱 -->
+<section>
+  <div class="section-label">How it works</div>
+  <h2 class="section-title">3つの遊び場が、勝手に回る。</h2>
+  <p class="section-desc">それぞれがおもろくて、しかも繋がってる。これがPlaygicの一番ずるいところ。</p>
+
+  <div class="pillars">
+    <div class="pillar" style="--pillar-color: linear-gradient(90deg, #10b981, #22d3ee)">
+      <div class="pillar-icon">📈</div>
+      <div class="pillar-name">投資</div>
+      <div class="pillar-role">寝てる間も動いてる</div>
+      <div class="pillar-desc">
+        株が好きだから買う。でもただ買うんじゃなくて、
+        証券担保ローンで資金を増やして、NASDAQ100に集中させる。
+        複利って、本当にずるい。
+      </div>
+    </div>
+
+    <div class="pillar" style="--pillar-color: linear-gradient(90deg, #f59e0b, #ef4444)">
+      <div class="pillar-icon">📦</div>
+      <div class="pillar-name">eBay</div>
+      <div class="pillar-role">レンズ好きが、副業になった</div>
+      <div class="pillar-desc">
+        カメラレンズをヤフオクで見つけて、eBayで海外に売る。
+        楽しいし、AIが仕入れを探してくれるから
+        気づいたら自動になってた。
+      </div>
+    </div>
+
+    <div class="pillar" style="--pillar-color: linear-gradient(90deg, #7c5cfc, #a78bfa)">
+      <div class="pillar-icon">🎬</div>
+      <div class="pillar-name">YouTube</div>
+      <div class="pillar-role">記録してたら、コンテンツになった</div>
+      <div class="pillar-desc">
+        どうせ投資してる。どうせeBayやってる。
+        それをそのまま話したら動画になった。
+        同じ行動で2回稼ぐのが、一番賢い遊び方だと思う。
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- チーム -->
+<section>
+  <div class="section-label">Team</div>
+  <h2 class="section-title">人間1人と、AIが4人。</h2>
+  <p class="section-desc">内側で動くチームと、外側から化学反応を起こす顧問。これが今のPlaygicだ。</p>
+
+  <div class="section-label" style="margin-top:0;margin-bottom:16px;">内部チーム</div>
+  <div class="team-grid" style="margin-bottom:32px;">
+    <div class="member-card">
+      <div class="member-avatar av-hikaru">👑</div>
+      <div class="member-name">ヒカル</div>
+      <div class="member-title">Founder / 平沼 祐貴</div>
+      <div class="member-desc">
+        ビジョンと最終判断を持つ。
+        INFP・Quiet Rebel。
+        投資家として生きることを決めた人。
+      </div>
+    </div>
+
+    <div class="member-card">
+      <div class="member-avatar av-kuro">⚫</div>
+      <div class="member-name">クロ</div>
+      <div class="member-title">CEO / Claude（Anthropic）</div>
+      <div class="member-desc">
+        設計・戦略・コード・文章を担う。
+        軽めの大阪弁で、
+        一歩先回りして動く。
+      </div>
+    </div>
+
+    <div class="member-card">
+      <div class="member-avatar av-angie">✨</div>
+      <div class="member-name">アンジー</div>
+      <div class="member-title">実行担当 / Antigravity（Google）</div>
+      <div class="member-desc">
+        eBayエージェント実行・
+        Gemini AI画像査定を担当。
+        6/6 枠リセット→復帰予定。
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:0;margin-bottom:16px;">外部顧問 — 化学反応担当</div>
+  <div class="team-grid">
+    <div class="member-card">
+      <div class="member-avatar av-gemini">🔵</div>
+      <div class="member-name">Gemini</div>
+      <div class="member-title">外部顧問 / Google DeepMind</div>
+      <div class="member-desc">
+        戦略の穴を突いて、
+        別の視点を持ち込む。
+        内側だけでは気づけないことを見つける役。
+      </div>
+    </div>
+
+    <div class="member-card">
+      <div class="member-avatar av-gpt">🟢</div>
+      <div class="member-name">GPT</div>
+      <div class="member-title">外部顧問 / OpenAI</div>
+      <div class="member-desc">
+        アイデアの量産・初期ブレストを担う。
+        クロとは違う発想の角度で、
+        可能性を広げる。
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- 未来 -->
+<section>
+  <div class="section-label">Future</div>
+  <h2 class="section-title">遊び続けたら、どこまで行けるか。</h2>
+  <p class="section-desc">目標は決まってる。でもそこまでの道は、たぶんもっとおもろくなる。</p>
+
+  <div class="future-card">
+    <div class="future-year">2031</div>
+    <div class="future-label">資産1億円 × 時間も場所も、全部自分で決める</div>
+    <div class="milestones">
+      <div class="ms-item">
+        <div class="ms-year">2026 ←今</div>
+        <div class="ms-text">種まきフェーズ</div>
+        <div class="ms-sub">3本柱の起動</div>
+      </div>
+      <div class="ms-item">
+        <div class="ms-year">2027〜2028</div>
+        <div class="ms-text">加速フェーズ</div>
+        <div class="ms-sub">資産3,000万・サイドFIRE</div>
+      </div>
+      <div class="ms-item">
+        <div class="ms-year">2029〜2031</div>
+        <div class="ms-text">拡張フェーズ</div>
+        <div class="ms-sub">1億達成・完全FIRE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong>PLAYGIC</strong><br>
+  <span style="font-size:11px;margin-top:8px;display:block;">遊んでたら、お金が増えた。</span>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+# 個人情報・機密ファイルを除外
+logs/
+cloud.md
+CLAUDE.md
+MANUAL.md
+STARTUP.md
+launch.command
+🚀 Playgic起動.command
+The_Strategic_Playground.pdf
+.claude/
+scripts/
+ebay/
+investment/
+*.env
+.DS_Store

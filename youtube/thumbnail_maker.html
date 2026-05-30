@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rebel Sheep — サムネイルメーカー</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080810;
+      --bg2: #0d0d1a;
+      --accent: #7c5cfc;
+      --accent2: #a78bfa;
+      --cyan: #22d3ee;
+      --white: #f1f0ff;
+      --gray: #8b8aa8;
+      --border: rgba(124,92,252,.25);
+    }
+
+    body {
+      background: #050508;
+      color: var(--white);
+      font-family: 'Inter', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── ヘッダー ── */
+    header {
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8,8,16,.9);
+      backdrop-filter: blur(20px);
+    }
+
+    .header-logo {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .2em;
+      background: linear-gradient(135deg, var(--accent2), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-sub { color: var(--gray); font-size: 13px; }
+
+    /* ── メインレイアウト ── */
+    .main {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── 左パネル（フォーム）── */
+    .panel {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 32px 28px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .panel-section h3 {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 16px;
+    }
+
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray);
+      margin-bottom: 6px;
+      letter-spacing: .05em;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      background: rgba(124,92,252,.08);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: var(--accent2);
+    }
+
+    .field input::placeholder { color: #444; }
+
+    .presets {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .preset-btn {
+      background: rgba(124,92,252,.1);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent2);
+      cursor: pointer;
+      text-align: center;
+      transition: all .2s;
+      letter-spacing: .03em;
+    }
+
+    .preset-btn:hover {
+      background: rgba(124,92,252,.2);
+      border-color: var(--accent2);
+    }
+
+    .download-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), #5b3fd4);
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .05em;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(124,92,252,.4);
+    }
+
+    .download-btn:active { transform: translateY(0); }
+
+    /* ── 右パネル（プレビュー）── */
+    .preview-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      background: #030305;
+      overflow: auto;
+    }
+
+    .preview-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .preview-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    /* ── サムネイル本体 (1280×720 を 0.6倍で表示) ── */
+    .thumb-wrapper {
+      transform: scale(0.6);
+      transform-origin: top center;
+      width: 1280px;
+      height: 720px;
+      margin-bottom: calc(720px * -0.4);
+    }
+
+    #thumbnail {
+      width: 1280px;
+      height: 720px;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 72px 96px;
+    }
+
+    #thumbnail::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,92,252,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,92,252,.06) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+
+    .thumb-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+    .thumb-orb-1 { width: 600px; height: 600px; background: var(--accent); opacity: .2; top: -200px; left: -150px; }
+    .thumb-orb-2 { width: 400px; height: 400px; background: var(--cyan); opacity: .15; bottom: -150px; right: -100px; }
+
+    .thumb-brand {
+      position: absolute;
+      top: 48px; left: 96px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .thumb-brand-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+    }
+
+    .thumb-brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--accent2), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #thumb-ep {
+      position: absolute;
+      top: 48px; right: 96px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray);
+      letter-spacing: .1em;
+    }
+
+    .thumb-content { position: relative; z-index: 1; }
+
+    #thumb-tag {
+      display: inline-block;
+      background: rgba(124,92,252,.15);
+      border: 1px solid rgba(124,92,252,.3);
+      border-radius: 4px;
+      padding: 6px 16px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent2);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    #thumb-number {
+      font-size: 160px;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1;
+      background: linear-gradient(135deg, #fff 40%, var(--accent2) 80%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 24px;
+    }
+
+    #thumb-main {
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -.02em;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    #thumb-sub {
+      font-size: 28px;
+      font-weight: 400;
+      color: var(--gray);
+    }
+
+    .thumb-line {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--cyan));
+    }
+
+    /* フォントサイズ調整ヒント */
+    .hint { font-size: 11px; color: var(--gray); margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">REBEL SHEEP — サムネイルメーカー</div>
+  <div class="header-sub">Powered by Playgic</div>
+</header>
+
+<div class="main">
+
+  <!-- 左：フォーム -->
+  <div class="panel">
+
+    <div class="panel-section">
+      <h3>プリセット</h3>
+      <div class="presets">
+        <div class="preset-btn" onclick="loadPreset('loan')">証券担保ローン</div>
+        <div class="preset-btn" onclick="loadPreset('ebay')">eBay</div>
+        <div class="preset-btn" onclick="loadPreset('portfolio')">ポートフォリオ</div>
+        <div class="preset-btn" onclick="loadPreset('fire')">サイドFIRE</div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <h3>テキスト入力</h3>
+
+      <div class="field">
+        <label>エピソード番号</label>
+        <input type="text" id="f-ep" value="#001" oninput="update()" placeholder="#001">
+      </div>
+
+      <div class="field">
+        <label>カテゴリタグ</label>
+        <input type="text" id="f-tag" value="証券担保ローン" oninput="update()" placeholder="例：証券担保ローン">
+      </div>
+
+      <div class="field">
+        <label>KEY NUMBER（大きい数字）</label>
+        <input type="text" id="f-number" value="¥500,000" oninput="update()" placeholder="例：¥500,000 / 2.15% / RSI55">
+        <div class="hint">数字・記号・金額など。大きく表示される。</div>
+      </div>
+
+      <div class="field">
+        <label>メインコピー（30字以内推奨）</label>
+        <input type="text" id="f-main" value="借金で、資産を作る話。" oninput="update()" placeholder="例：借金で、資産を作る話。">
+      </div>
+
+      <div class="field">
+        <label>サブコピー（補足・数字）</label>
+        <input type="text" id="f-sub" value="金利2.15%の意味、全部見せる。" oninput="update()" placeholder="例：金利2.15%の意味、全部見せる。">
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <h3>フォントサイズ調整</h3>
+      <div class="field">
+        <label>KEY NUMBER サイズ（px）</label>
+        <input type="number" id="f-numsize" value="160" min="60" max="240" oninput="update()">
+      </div>
+      <div class="field">
+        <label>メインコピー サイズ（px）</label>
+        <input type="number" id="f-mainsize" value="52" min="24" max="100" oninput="update()">
+      </div>
+    </div>
+
+    <button class="download-btn" onclick="download()">⬇ PNG ダウンロード（1280×720）</button>
+
+  </div>
+
+  <!-- 右：プレビュー -->
+  <div class="preview-area">
+    <div class="preview-wrap">
+      <div class="preview-label">▶ プレビュー（実寸の60%）</div>
+      <div class="thumb-wrapper">
+        <div id="thumbnail">
+          <div class="thumb-orb thumb-orb-1"></div>
+          <div class="thumb-orb thumb-orb-2"></div>
+
+          <div class="thumb-brand">
+            <div class="thumb-brand-dot"></div>
+            <div class="thumb-brand-name">Rebel Sheep</div>
+          </div>
+
+          <div id="thumb-ep">#001</div>
+
+          <div class="thumb-content">
+            <div id="thumb-tag">証券担保ローン</div>
+            <div id="thumb-number">¥500,000</div>
+            <div id="thumb-main">借金で、資産を作る話。</div>
+            <div id="thumb-sub">金利2.15%の意味、全部見せる。</div>
+          </div>
+
+          <div class="thumb-line"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // リアルタイム更新
+  function update() {
+    document.getElementById('thumb-ep').textContent    = document.getElementById('f-ep').value;
+    document.getElementById('thumb-tag').textContent   = document.getElementById('f-tag').value;
+    document.getElementById('thumb-number').textContent = document.getElementById('f-number').value;
+    document.getElementById('thumb-main').textContent  = document.getElementById('f-main').value;
+    document.getElementById('thumb-sub').textContent   = document.getElementById('f-sub').value;
+
+    document.getElementById('thumb-number').style.fontSize = document.getElementById('f-numsize').value + 'px';
+    document.getElementById('thumb-main').style.fontSize   = document.getElementById('f-mainsize').value + 'px';
+  }
+
+  // プリセット
+  const presets = {
+    loan: {
+      ep: '#001', tag: '証券担保ローン', number: '¥500,000',
+      main: '借金で、資産を作る話。', sub: '金利2.15%の意味、全部見せる。',
+      numsize: 160, mainsize: 52
+    },
+    ebay: {
+      ep: '#002', tag: 'eBay輸出', number: '+¥32,000',
+      main: 'レンズ4本仕入れた結果。', sub: '30日実験、数字をそのまま出す。',
+      numsize: 140, mainsize: 52
+    },
+    portfolio: {
+      ep: '#003', tag: 'ポートフォリオ', number: '60銘柄',
+      main: '多すぎた。整理した全記録。', sub: '売った理由、買い増した理由。',
+      numsize: 130, mainsize: 52
+    },
+    fire: {
+      ep: '#004', tag: 'サイドFIRE', number: '¥1億',
+      main: '逆算すると、こうなった。', sub: '会社員しながら資産1億への道。',
+      numsize: 130, mainsize: 52
+    }
+  };
+
+  function loadPreset(key) {
+    const p = presets[key];
+    document.getElementById('f-ep').value       = p.ep;
+    document.getElementById('f-tag').value      = p.tag;
+    document.getElementById('f-number').value   = p.number;
+    document.getElementById('f-main').value     = p.main;
+    document.getElementById('f-sub').value      = p.sub;
+    document.getElementById('f-numsize').value  = p.numsize;
+    document.getElementById('f-mainsize').value = p.mainsize;
+    update();
+  }
+
+  // PNG ダウンロード
+  async function download() {
+    const btn = document.querySelector('.download-btn');
+    btn.textContent = '⏳ 書き出し中...';
+    btn.disabled = true;
+
+    try {
+      const el = document.getElementById('thumbnail');
+      const canvas = await html2canvas(el, {
+        width: 1280,
+        height: 720,
+        scale: 1,
+        useCORS: true,
+        backgroundColor: '#080810'
+      });
+
+      const ep = document.getElementById('f-ep').value.replace('#', '');
+      const link = document.createElement('a');
+      link.download = `rebel-sheep-thumb-${ep}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch(e) {
+      alert('書き出しに失敗しました。ブラウザのCORSポリシーを確認してください。');
+    }
+
+    btn.textContent = '⬇ PNG ダウンロード（1280×720）';
+    btn.disabled = false;
+  }
+</script>
+
+</body>
+</html>

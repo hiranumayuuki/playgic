@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLAYGIC — Play × Logic × Strategic × Magic</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Space+Grotesk:wght@300;400;500;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080810;
+      --bg2: #0d0d1a;
+      --accent: #7c5cfc;
+      --accent2: #a78bfa;
+      --cyan: #22d3ee;
+      --white: #f1f0ff;
+      --gray: #8b8aa8;
+      --border: rgba(124, 92, 252, 0.2);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', 'Space Grotesk', -apple-system, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,92,252,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,92,252,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(8,8,16,.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      background: linear-gradient(135deg, var(--accent2), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--gray);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124,92,252,.12);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent2);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(1.5); }
+    }
+
+    h1.hero-title {
+      font-size: clamp(56px, 12vw, 120px);
+      font-weight: 900;
+      letter-spacing: -.02em;
+      line-height: 1;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2) 70%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 40px;
+    }
+
+    .hero-philosophy {
+      max-width: 480px;
+      margin-bottom: 48px;
+    }
+
+    .hero-philosophy .line1 {
+      font-size: clamp(15px, 2vw, 18px);
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 20px;
+      letter-spacing: .02em;
+    }
+
+    .hero-philosophy .line2 {
+      font-size: clamp(13px, 1.6vw, 15px);
+      color: var(--gray);
+      line-height: 2.2;
+      margin-bottom: 20px;
+    }
+
+    .hero-philosophy .line3 {
+      font-size: clamp(13px, 1.6vw, 15px);
+      font-weight: 500;
+      background: linear-gradient(135deg, var(--accent2), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: .05em;
+    }
+
+    .hero-equation {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 56px;
+    }
+
+    .eq-item {
+      background: rgba(124,92,252,.1);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent2);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .eq-x { color: var(--gray); font-size: 18px; font-weight: 300; }
+
+    .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all .2s;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #5b3fd4);
+      color: #fff;
+      border: none;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,92,252,.4); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      opacity: .25;
+    }
+    .orb-1 { width: 500px; height: 500px; background: var(--accent); top: -100px; left: -150px; }
+    .orb-2 { width: 400px; height: 400px; background: var(--cyan); bottom: -100px; right: -100px; }
+
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 100px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -.02em;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      color: var(--gray);
+      font-size: 16px;
+      max-width: 560px;
+      line-height: 1.8;
+    }
+
+    #philosophy { border-top: 1px solid var(--border); }
+
+    .philosophy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      margin-top: 64px;
+      align-items: center;
+    }
+
+    .philosophy-text p {
+      color: var(--gray);
+      font-size: 15px;
+      line-height: 2;
+      margin-bottom: 20px;
+    }
+
+    .philosophy-text strong { color: var(--white); }
+
+    .philosophy-card {
+      background: rgba(124,92,252,.07);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+    }
+
+    .philosophy-card .big-text {
+      font-size: 13px;
+      color: var(--gray);
+      line-height: 2;
+    }
+
+    .philosophy-card .big-text em {
+      font-style: normal;
+      color: var(--accent2);
+      font-weight: 600;
+    }
+
+    #pillars { border-top: 1px solid var(--border); }
+
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 64px;
+    }
+
+    .pillar-card {
+      background: rgba(13,13,26,.8);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      transition: all .3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pillar-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--cyan));
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .pillar-card:hover { transform: translateY(-6px); border-color: rgba(124,92,252,.4); }
+    .pillar-card:hover::before { opacity: 1; }
+
+    .pillar-icon { font-size: 32px; margin-bottom: 20px; display: block; }
+
+    .pillar-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -.01em;
+    }
+
+    .pillar-desc {
+      color: var(--gray);
+      font-size: 14px;
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+
+    .pillar-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .tag {
+      background: rgba(124,92,252,.12);
+      border: 1px solid rgba(124,92,252,.2);
+      border-radius: 4px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent2);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    #mission { border-top: 1px solid var(--border); text-align: center; }
+
+    .mission-box {
+      background: linear-gradient(135deg, rgba(124,92,252,.1), rgba(34,211,238,.05));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 80px 48px;
+      margin-top: 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mission-box::after {
+      content: 'PLAYGIC';
+      position: absolute;
+      font-size: 180px;
+      font-weight: 900;
+      color: rgba(124,92,252,.04);
+      bottom: -40px;
+      right: -20px;
+      letter-spacing: -.05em;
+      pointer-events: none;
+    }
+
+    .mission-quote {
+      font-size: clamp(18px, 3vw, 28px);
+      font-weight: 600;
+      line-height: 1.7;
+      max-width: 700px;
+      margin: 0 auto 24px;
+    }
+
+    .mission-quote em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--accent2), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .mission-sub { color: var(--gray); font-size: 14px; }
+
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 64px;
+      margin-top: 64px;
+      flex-wrap: wrap;
+    }
+
+    .stat { text-align: center; }
+
+    .stat-num {
+      font-size: 40px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--white), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -.03em;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-top: 4px;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .footer-logo {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: .15em;
+      background: linear-gradient(135deg, var(--accent2), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .footer-copy { color: var(--gray); font-size: 13px; }
+    .footer-tagline { color: var(--gray); font-size: 12px; letter-spacing: .05em; }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      section { padding: 64px 24px; }
+      .philosophy-grid { grid-template-columns: 1fr; }
+      .pillars-grid { grid-template-columns: 1fr; }
+      .stats-row { gap: 40px; }
+      footer { padding: 32px 24px; flex-direction: column; text-align: center; }
+      .mission-box { padding: 48px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">PLAYGIC</div>
+    <ul class="nav-links">
+      <li><a href="#philosophy">Philosophy</a></li>
+      <li><a href="#pillars">Business</a></li>
+      <li><a href="#mission">Mission</a></li>
+    </ul>
+  </nav>
+
+  <div id="hero">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="hero-badge">AI-Driven Organization</div>
+
+    <h1 class="hero-title">PLAYGIC</h1>
+
+    <div class="hero-philosophy">
+      <p class="line1">過去の延長線上にない未来へ。</p>
+      <p class="line2">
+        1を10にする努力より、<br>
+        10を∞にする支点を探す。
+      </p>
+      <p class="line3">レバレッジという、静かな魔法。</p>
+    </div>
+
+    <div class="hero-equation">
+      <span class="eq-item">Play</span>
+      <span class="eq-x">×</span>
+      <span class="eq-item">Logic</span>
+      <span class="eq-x">×</span>
+      <span class="eq-item">Strategic</span>
+      <span class="eq-x">×</span>
+      <span class="eq-item">Magic</span>
+    </div>
+
+    <div class="hero-cta">
+      <a href="#pillars" class="btn btn-primary">Business Areas</a>
+      <a href="#philosophy" class="btn btn-ghost">Philosophy</a>
+    </div>
+  </div>
+
+  <section id="philosophy">
+    <div class="section-label">Philosophy</div>
+    <h2 class="section-title">Quiet Rebel<br>の思想</h2>
+
+    <div class="philosophy-grid">
+      <div class="philosophy-text">
+        <p>
+          <strong>常識に従わないことが、最大の支点になる。</strong><br>
+          世の中のほとんどの人は、借金を恐れ、安定を求め、システムの中で消耗する。
+        </p>
+        <p>
+          Playgicは逆を行く。<br>
+          <strong>負債を資産として設計し、</strong>
+          <strong>AIを組織として動かし、</strong>
+          <strong>時間と場所の自由を買い取る。</strong>
+        </p>
+        <p>
+          派手に叫ばない。<br>
+          ただ、静かに、確実に、支点の位置を変え続ける。
+        </p>
+      </div>
+      <div class="philosophy-card">
+        <p class="big-text">
+          <em>投資</em>で資産を増やし、<br>
+          <em>eBay</em>でキャッシュを生み出し、<br>
+          <em>メディア</em>で影響力を積み上げる。<br><br>
+          この3つが連動するとき、<br>
+          小さな行動が大きな結果に変わる。<br><br>
+          それが Playgic の<em>永久機関</em>。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pillars">
+    <div class="section-label">Business Areas</div>
+    <h2 class="section-title">3つの事業領域</h2>
+    <p class="section-desc">AIを軸に、投資・eBay・メディアが連動する構造を設計している。</p>
+
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <span class="pillar-icon">📈</span>
+        <div class="pillar-title">Investment</div>
+        <p class="pillar-desc">
+          成長×モメンタム戦略で米国株・NASDAQ・Bitcoinに投資。
+          証券担保ローンを活用したレバレッジ運用で資産1億を目指す。
+        </p>
+        <div class="pillar-tags">
+          <span class="tag">NASDAQ100</span>
+          <span class="tag">半導体</span>
+          <span class="tag">証券担保ローン</span>
+          <span class="tag">Bitcoin</span>
+        </div>
+      </div>
+
+      <div class="pillar-card">
+        <span class="pillar-icon">📦</span>
+        <div class="pillar-title">eBay Export</div>
+        <p class="pillar-desc">
+          日本の中古カメラレンズ・ヴィンテージ品を海外へ輸出。
+          円安優位と日本品質を武器に、AIでリスティングを自動化する。
+        </p>
+        <div class="pillar-tags">
+          <span class="tag">カメラレンズ</span>
+          <span class="tag">レトロゲーム</span>
+          <span class="tag">自動化</span>
+          <span class="tag">キャッシュフロー</span>
+        </div>
+      </div>
+
+      <div class="pillar-card">
+        <span class="pillar-icon">📹</span>
+        <div class="pillar-title">Media</div>
+        <p class="pillar-desc">
+          YouTube「Rebel Sheep」で投資×副業×AIのリアルな軌跡を発信。
+          支点という概念を、等身大の言葉で届ける。
+        </p>
+        <div class="pillar-tags">
+          <span class="tag">YouTube</span>
+          <span class="tag">証券担保ローン</span>
+          <span class="tag">サイドFIRE</span>
+          <span class="tag">AI活用</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="mission">
+    <div class="section-label">Mission</div>
+    <h2 class="section-title">なぜ、Playgicか</h2>
+
+    <div class="mission-box">
+      <p class="mission-quote">
+        <em>過去の延長線上にない未来へ。</em><br><br>
+        1を10にする努力より、<br>
+        10を∞にする支点を探す。<br><br>
+        <em>レバレッジという、静かな魔法。</em>
+      </p>
+      <p class="mission-sub">会社員を辞める日まで、静かに積み上げていく。</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-num">¥1,778万</div>
+        <div class="stat-label">運用資産総額</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3</div>
+        <div class="stat-label">事業部門</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">AI</div>
+        <div class="stat-label">全部門を駆動するエンジン</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">¥1億</div>
+        <div class="stat-label">ターゲット資産</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">PLAYGIC</div>
+    <div class="footer-tagline">Play × Logic × Strategic × Magic</div>
+    <div class="footer-copy">© 2026 Playgic. All rights reserved.</div>
+  </footer>
+
+</body>
+</html>

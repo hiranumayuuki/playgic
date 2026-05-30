@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ポートフォリオ分析 — Playgic Tools</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#080810; --bg2:#0d0d1a; --accent:#7c5cfc; --accent2:#a78bfa;
+      --cyan:#22d3ee; --green:#10b981; --red:#f87171; --orange:#f59e0b;
+      --white:#f1f0ff; --gray:#8b8aa8; --border:rgba(124,92,252,.2);
+    }
+    body { background:var(--bg); color:var(--white); font-family:'Inter',sans-serif; min-height:100vh; }
+    body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(124,92,252,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,252,.04) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; z-index:0; }
+    nav { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 32px; height:64px; background:rgba(8,8,16,.9); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+    .nav-logo { font-size:14px; font-weight:800; letter-spacing:.15em; background:linear-gradient(135deg,var(--accent2),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .nav-back { font-size:13px; color:var(--gray); text-decoration:none; transition:color .2s; }
+    .nav-back:hover { color:var(--white); }
+    .wrap { max-width:1200px; margin:0 auto; padding:48px 32px; position:relative; z-index:1; }
+    .page-header { margin-bottom:40px; }
+    .page-header h1 { font-size:32px; font-weight:800; margin-bottom:8px; }
+    .page-header p { color:var(--gray); font-size:14px; line-height:1.7; }
+    .section { margin-bottom:48px; }
+    .section-title { font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--accent2); margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+    .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+    .card { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:28px; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+    @media(max-width:800px) { .grid-2 { grid-template-columns:1fr; } }
+    canvas { display:block; width:100% !important; }
+    .tooltip {
+      position:fixed; background:rgba(13,13,26,.95); border:1px solid var(--border);
+      border-radius:8px; padding:10px 14px; font-size:12px; pointer-events:none;
+      z-index:999; display:none;
+    }
+    .tooltip strong { color:var(--accent2); }
+    /* KPI行 */
+    .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+    @media(max-width:700px) { .kpi-row { grid-template-columns:1fr 1fr; } }
+    .kpi { background:rgba(124,92,252,.07); border:1px solid var(--border); border-radius:12px; padding:18px; text-align:center; }
+    .kpi-label { font-size:10px; color:var(--gray); letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; }
+    .kpi-val { font-size:28px; font-weight:900; }
+    .kpi-val.accent { background:linear-gradient(135deg,var(--accent2),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .kpi-val.green { background:linear-gradient(135deg,var(--green),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .kpi-val.orange { color:var(--orange); }
+    .kpi-val.red { color:var(--red); }
+    .kpi-sub { font-size:11px; color:var(--gray); margin-top:4px; }
+    /* モンテカルロ */
+    .mc-controls { display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+    .mc-btn { background:rgba(124,92,252,.15); border:1px solid var(--border); border-radius:8px; padding:8px 16px; font-size:12px; font-weight:600; color:var(--accent2); cursor:pointer; transition:all .2s; }
+    .mc-btn:hover, .mc-btn.active { background:rgba(124,92,252,.3); border-color:var(--accent2); }
+    .mc-legend { display:flex; gap:20px; flex-wrap:wrap; margin-top:12px; }
+    .mc-legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--gray); }
+    .mc-legend-dot { width:20px; height:2px; border-radius:1px; }
+    /* 分布バー */
+    .dist-row { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+    .dist-label { font-size:11px; color:var(--gray); width:80px; text-align:right; flex-shrink:0; }
+    .dist-bar-wrap { flex:1; height:6px; background:rgba(255,255,255,.06); border-radius:3px; overflow:hidden; }
+    .dist-bar { height:100%; border-radius:3px; transition:width .8s ease; }
+    .dist-val { font-size:11px; font-weight:700; width:80px; flex-shrink:0; }
+  </style>
+</head>
+<body>
+<div class="tooltip" id="tooltip"></div>
+<nav>
+  <a href="index.html" class="nav-back">← Playgic Tools</a>
+  <div class="nav-logo">ポートフォリオ分析</div>
+  <div style="width:120px"></div>
+</nav>
+<div class="wrap">
+  <div class="page-header">
+    <h1>📊 金融工学的ポートフォリオ分析</h1>
+    <p>ツリーマップ・効率的フロンティア・モンテカルロシミュレーションで現在地を可視化する。</p>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">総資産</div><div class="kpi-val accent">1,931万</div><div class="kpi-sub">現在評価額</div></div>
+    <div class="kpi"><div class="kpi-label">期待リターン（加重平均）</div><div class="kpi-val green" id="kpi-ret">—</div><div class="kpi-sub">年率</div></div>
+    <div class="kpi"><div class="kpi-label">ポートフォリオリスク</div><div class="kpi-val orange" id="kpi-risk">—</div><div class="kpi-sub">年率標準偏差（推定）</div></div>
+    <div class="kpi"><div class="kpi-label">シャープレシオ</div><div class="kpi-val" id="kpi-sharpe" style="color:var(--white)">—</div><div class="kpi-sub">無リスク金利 0.5%</div></div>
+  </div>
+
+  <!-- ① ツリーマップ -->
+  <div class="section">
+    <div class="section-title">① アセット配分ツリーマップ</div>
+    <div class="card">
+      <canvas id="treemap" height="360"></canvas>
+    </div>
+  </div>
+
+  <!-- ② リスク・リターン + 効率的フロンティア -->
+  <div class="section">
+    <div class="section-title">② リスク・リターン散布図 + 効率的フロンティア</div>
+    <div class="card">
+      <p style="font-size:12px;color:var(--gray);margin-bottom:16px">各カテゴリの期待リターンとリスク（標準偏差）をプロット。曲線は理論上の効率的フロンティア。★が現在のポートフォリオ全体。</p>
+      <canvas id="frontier" height="380"></canvas>
+    </div>
+  </div>
+
+  <!-- ③ モンテカルロ -->
+  <div class="section">
+    <div class="section-title">③ モンテカルロ シミュレーション（1,000パス）</div>
+    <div class="card">
+      <p style="font-size:12px;color:var(--gray);margin-bottom:16px">現在のポートフォリオで月5万積み立て継続した場合の10年後の資産分布（正規分布乱数）。</p>
+      <div class="mc-controls">
+        <button class="mc-btn active" id="btn-current" onclick="runMC('current')">現状ポートフォリオ</button>
+        <button class="mc-btn" id="btn-optimized" onclick="runMC('optimized')">最適化後（NASDAQ+半導体集中）</button>
+      </div>
+      <canvas id="montecarlo" height="280"></canvas>
+      <div class="mc-legend">
+        <div class="mc-legend-item"><div class="mc-legend-dot" style="background:rgba(167,139,250,.3)"></div>各パス</div>
+        <div class="mc-legend-item"><div class="mc-legend-dot" style="background:#22d3ee"></div>中央値（50%ile）</div>
+        <div class="mc-legend-item"><div class="mc-legend-dot" style="background:#10b981;height:0;border-top:2px dashed #10b981"></div>75%ile</div>
+        <div class="mc-legend-item"><div class="mc-legend-dot" style="background:#f87171;height:0;border-top:2px dashed #f87171"></div>25%ile</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ シャープレシオ比較 -->
+  <div class="section">
+    <div class="section-title">④ カテゴリ別シャープレシオ（リスク調整後リターン効率）</div>
+    <div class="card">
+      <p style="font-size:12px;color:var(--gray);margin-bottom:20px">シャープレシオ = （期待リターン − 無リスク金利）÷ リスク。高いほど効率的。</p>
+      <div id="sharpe-bars"></div>
+    </div>
+  </div>
+
+  <!-- ⑤ 10年後分布サマリー -->
+  <div class="section">
+    <div class="section-title">⑤ 10年後 資産分布サマリー</div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:12px;color:var(--accent2);font-weight:700;letter-spacing:.1em;margin-bottom:16px">現状ポートフォリオ</div>
+        <div id="dist-current"></div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--orange);font-weight:700;letter-spacing:.1em;margin-bottom:16px">最適化後（NASDAQ+半導体）</div>
+        <div id="dist-optimized"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const DPR = window.devicePixelRatio || 1;
+const RF = 0.005; // 無リスク金利 0.5%
+
+const CATEGORIES = [
+  { name:'S&P500系',    amount:5252723, ret:0.10, risk:0.15, color:'#7c5cfc' },
+  { name:'現金・預金',  amount:2555086, ret:0.005,risk:0.00, color:'#8b8aa8' },
+  { name:'NASDAQ100系', amount:2573266, ret:0.15, risk:0.20, color:'#22d3ee' },
+  { name:'全世界株式',  amount:2329122, ret:0.09, risk:0.13, color:'#a78bfa' },
+  { name:'テック・成長',amount:1850083, ret:0.14, risk:0.22, color:'#6366f1' },
+  { name:'高配当系',    amount:1086785, ret:0.07, risk:0.12, color:'#f59e0b' },
+  { name:'債券系',      amount:932537,  ret:0.03, risk:0.08, color:'#64748b' },
+  { name:'半導体系',    amount:640122,  ret:0.18, risk:0.28, color:'#ef4444' },
+  { name:'ゴールド',    amount:489215,  ret:0.06, risk:0.18, color:'#eab308' },
+  { name:'インド株',    amount:421128,  ret:0.12, risk:0.25, color:'#f97316' },
+  { name:'個別株',      amount:460000,  ret:0.12, risk:0.30, color:'#ec4899' },
+  { name:'その他',      amount:221383,  ret:0.05, risk:0.10, color:'#475569' },
+];
+const TOTAL = CATEGORIES.reduce((s,c)=>s+c.amount,0);
+
+// 加重平均リターン・リスク
+const portRet  = CATEGORIES.reduce((s,c)=>s+c.ret*(c.amount/TOTAL),0);
+const portRisk = Math.sqrt(CATEGORIES.reduce((s,c)=>s+Math.pow(c.risk*(c.amount/TOTAL),2),0))*2.5;
+const sharpe   = (portRet - RF) / portRisk;
+
+document.getElementById('kpi-ret').textContent    = (portRet*100).toFixed(1)+'%';
+document.getElementById('kpi-risk').textContent   = (portRisk*100).toFixed(1)+'%';
+document.getElementById('kpi-sharpe').textContent = sharpe.toFixed(2);
+document.getElementById('kpi-sharpe').className   = 'kpi-val ' + (sharpe>0.7?'green':sharpe>0.4?'orange':'red');
+
+// ── ① ツリーマップ ──────────────────────────
+function drawTreemap() {
+  const canvas = document.getElementById('treemap');
+  const W = canvas.parentElement.clientWidth - 56;
+  const H = 360;
+  canvas.width = W*DPR; canvas.height = H*DPR;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(DPR,DPR);
+
+  const sorted = [...CATEGORIES].sort((a,b)=>b.amount-a.amount);
+  const rects = squarify(sorted, {x:0,y:0,w:W,h:H});
+
+  rects.forEach(r => {
+    // 塗り
+    ctx.fillStyle = r.cat.color+'33';
+    ctx.strokeStyle = r.cat.color+'88';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(r.x+2, r.y+2, r.w-4, r.h-4, 6);
+    ctx.fill(); ctx.stroke();
+
+    // テキスト
+    if (r.w > 60 && r.h > 30) {
+      ctx.fillStyle = '#f1f0ff';
+      ctx.font = `bold ${Math.min(13, r.w/8)}px Inter`;
+      ctx.textAlign = 'center';
+      const cx = r.x + r.w/2, cy = r.y + r.h/2;
+      ctx.fillText(r.cat.name, cx, cy - (r.h>50?8:0));
+      if (r.h > 50) {
+        ctx.font = `${Math.min(11, r.w/9)}px Inter`;
+        ctx.fillStyle = r.cat.color;
+        ctx.fillText('¥'+(r.cat.amount/10000).toFixed(0)+'万', cx, cy+10);
+        ctx.fillStyle = '#8b8aa8';
+        ctx.fillText((r.cat.amount/TOTAL*100).toFixed(1)+'%', cx, cy+24);
+      }
+    }
+  });
+
+  // tooltip
+  canvas.onmousemove = e => {
+    const bx = canvas.getBoundingClientRect();
+    const mx = e.clientX - bx.left, my = e.clientY - bx.top;
+    const hit = rects.find(r=>mx>=r.x&&mx<=r.x+r.w&&my>=r.y&&my<=r.y+r.h);
+    const tip = document.getElementById('tooltip');
+    if (hit) {
+      tip.style.display='block';
+      tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY-10)+'px';
+      tip.innerHTML=`<strong>${hit.cat.name}</strong><br>¥${hit.cat.amount.toLocaleString()}<br>比率: ${(hit.cat.amount/TOTAL*100).toFixed(1)}%<br>期待リターン: ${(hit.cat.ret*100).toFixed(0)}%<br>リスク: ${(hit.cat.risk*100).toFixed(0)}%`;
+    } else { tip.style.display='none'; }
+  };
+  canvas.onmouseleave=()=>{ document.getElementById('tooltip').style.display='none'; };
+}
+
+function squarify(items, bounds) {
+  if (!items.length) return [];
+  const total = items.reduce((s,c)=>s+c.amount,0);
+  const rects = [];
+  let rem = [...items];
+  let bnd = {...bounds};
+
+  while (rem.length) {
+    const useRow = bnd.w >= bnd.h;
+    const rowTotal = rem.reduce((s,c)=>s+c.amount,0);
+    let row = [];
+    let rowSum = 0;
+    let best = Infinity;
+
+    for (let i=0; i<rem.length; i++) {
+      const trial = [...row, rem[i]];
+      const trialSum = rowSum + rem[i].amount;
+      const ratio = useRow
+        ? trialSum/rowTotal * bnd.w
+        : trialSum/rowTotal * bnd.h;
+      const aspect = trial.reduce((worst,c)=>{
+        const frac = c.amount/trialSum;
+        const w2 = useRow ? ratio : frac*(bnd.w);
+        const h2 = useRow ? frac*(bnd.h) : ratio;
+        return Math.max(worst, Math.max(w2/h2, h2/w2));
+      }, 0);
+      if (aspect < best) { best=aspect; row=trial; rowSum=trialSum; }
+      else break;
+    }
+
+    const rowFrac = rowSum/rowTotal;
+    const rowLen = useRow ? bnd.w*rowFrac : bnd.h*rowFrac;
+    let pos = useRow ? bnd.y : bnd.x;
+    row.forEach(c => {
+      const frac = c.amount/rowSum;
+      const size = (useRow ? bnd.h : bnd.w) * frac;
+      rects.push(useRow
+        ? {cat:c, x:bnd.x, y:pos, w:rowLen, h:size}
+        : {cat:c, x:pos, y:bnd.y, w:size, h:rowLen}
+      );
+      pos += size;
+    });
+    rem = rem.slice(row.length);
+    if (useRow) { bnd.x+=rowLen; bnd.w-=rowLen; }
+    else        { bnd.y+=rowLen; bnd.h-=rowLen; }
+  }
+  return rects;
+}
+
+// ── ② 効率的フロンティア ────────────────────
+function drawFrontier() {
+  const canvas = document.getElementById('frontier');
+  const W = canvas.parentElement.clientWidth - 56;
+  const H = 380;
+  canvas.width = W*DPR; canvas.height = H*DPR;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(DPR,DPR);
+
+  const PAD = {l:60,r:30,t:20,b:50};
+  const IW = W-PAD.l-PAD.r, IH = H-PAD.t-PAD.b;
+
+  const maxRisk = 0.35, maxRet = 0.22;
+  const toX = r => PAD.l + (r/maxRisk)*IW;
+  const toY = r => PAD.t + IH - (r/maxRet)*IH;
+
+  // グリッド
+  ctx.strokeStyle='rgba(124,92,252,.08)'; ctx.lineWidth=1;
+  [0,0.05,0.10,0.15,0.20].forEach(r=>{
+    const y=toY(r);
+    ctx.beginPath(); ctx.moveTo(PAD.l,y); ctx.lineTo(W-PAD.r,y); ctx.stroke();
+    ctx.fillStyle='rgba(139,138,168,.6)'; ctx.font='10px Inter'; ctx.textAlign='right';
+    ctx.fillText((r*100).toFixed(0)+'%',PAD.l-6,y+3);
+  });
+  [0,0.1,0.2,0.3].forEach(r=>{
+    const x=toX(r);
+    ctx.beginPath(); ctx.moveTo(x,PAD.t); ctx.lineTo(x,H-PAD.b); ctx.stroke();
+    ctx.fillStyle='rgba(139,138,168,.6)'; ctx.font='10px Inter'; ctx.textAlign='center';
+    ctx.fillText((r*100).toFixed(0)+'%',x,H-PAD.b+16);
+  });
+
+  // 軸ラベル
+  ctx.fillStyle='rgba(139,138,168,.8)'; ctx.font='11px Inter';
+  ctx.textAlign='center'; ctx.fillText('リスク（標準偏差）',W/2,H-4);
+  ctx.save(); ctx.translate(14,H/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('期待リターン',0,0); ctx.restore();
+
+  // 効率的フロンティア（放物線近似）
+  const frontierPts = [];
+  for (let r=0.05; r<=0.32; r+=0.01) {
+    const ret = 0.002 + 0.5*r + 1.2*r*r;
+    frontierPts.push({r,ret:Math.min(ret,0.21)});
+  }
+  const grad = ctx.createLinearGradient(toX(0.05),0,toX(0.32),0);
+  grad.addColorStop(0,'#22d3ee'); grad.addColorStop(1,'#f59e0b');
+  ctx.beginPath();
+  frontierPts.forEach((p,i)=>{ const x=toX(p.r),y=toY(p.ret); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.strokeStyle=grad; ctx.lineWidth=2; ctx.setLineDash([6,3]); ctx.stroke(); ctx.setLineDash([]);
+
+  // 効率的フロンティアラベル
+  ctx.fillStyle='rgba(34,211,238,.7)'; ctx.font='10px Inter'; ctx.textAlign='left';
+  ctx.fillText('効率的フロンティア',toX(0.22),toY(0.17)-6);
+
+  // 各カテゴリ散布
+  CATEGORIES.forEach(c => {
+    const x=toX(c.risk), y=toY(c.ret);
+    const r = Math.max(6, Math.sqrt(c.amount/TOTAL)*40);
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=c.color+'44'; ctx.fill();
+    ctx.strokeStyle=c.color; ctx.lineWidth=1.5; ctx.stroke();
+    if (c.amount > 800000) {
+      ctx.fillStyle='#f1f0ff'; ctx.font='bold 10px Inter'; ctx.textAlign='center';
+      ctx.fillText(c.name, x, y-r-4);
+    }
+  });
+
+  // 現在のポートフォリオ全体（★）
+  const px=toX(portRisk), py=toY(portRet);
+  ctx.font='22px Inter'; ctx.textAlign='center'; ctx.fillStyle='#f59e0b';
+  ctx.fillText('★', px, py+7);
+  ctx.fillStyle='#f59e0b'; ctx.font='bold 11px Inter';
+  ctx.fillText('現在のPF', px, py-16);
+  ctx.fillStyle='rgba(139,138,168,.8)'; ctx.font='10px Inter';
+  ctx.fillText(`R:${(portRet*100).toFixed(1)}% σ:${(portRisk*100).toFixed(1)}%`, px, py+24);
+
+  // 最適化後の点
+  const oRet=0.14, oRisk=0.17;
+  const ox=toX(oRisk), oy=toY(oRet);
+  ctx.font='22px Inter'; ctx.fillStyle='#22d3ee';
+  ctx.fillText('◆', ox, oy+7);
+  ctx.fillStyle='#22d3ee'; ctx.font='bold 11px Inter'; ctx.textAlign='left';
+  ctx.fillText('最適化後', ox+12, oy-4);
+}
+
+// ── ③ モンテカルロ ──────────────────────────
+const MC_PARAMS = {
+  current:   { ret:portRet,   risk:portRisk,  monthly:50000, label:'現状PF' },
+  optimized: { ret:0.14,      risk:0.17,      monthly:50000, label:'最適化後' },
+};
+let currentMode = 'current';
+
+function runMC(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mc-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn-'+mode).classList.add('active');
+  drawMC(mode);
+  drawDist();
+}
+
+function monteCarlo(ret, risk, monthly, N=1000, years=10) {
+  const paths = [];
+  const start = TOTAL;
+  const mr = ret/12, mr_risk = risk/Math.sqrt(12);
+  for (let i=0;i<N;i++) {
+    const path = [start];
+    let cur = start;
+    for (let m=0; m<years*12; m++) {
+      const shock = mr_risk * randn();
+      cur = cur*(1+mr+shock) + monthly;
+    }
+    paths.push(cur);
+  }
+  return paths;
+}
+
+function randn() {
+  let u=0,v=0;
+  while(u===0)u=Math.random();
+  while(v===0)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+function drawMC(mode) {
+  const p = MC_PARAMS[mode];
+  const canvas = document.getElementById('montecarlo');
+  const W = canvas.parentElement.clientWidth - 56;
+  const H = 280;
+  canvas.width=W*DPR; canvas.height=H*DPR;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d'); ctx.scale(DPR,DPR);
+
+  const N=400, YEARS=10;
+  const mr=p.ret/12, mr_risk=p.risk/Math.sqrt(12);
+  const PAD={l:70,r:20,t:20,b:40};
+  const IW=W-PAD.l-PAD.r, IH=H-PAD.t-PAD.b;
+
+  // 全パスを生成
+  const allPaths=[], finalVals=[];
+  for(let i=0;i<N;i++){
+    const path=[TOTAL];
+    let cur=TOTAL;
+    for(let m=0;m<YEARS*12;m++){ cur=cur*(1+mr+mr_risk*randn())+p.monthly; }
+    allPaths.push(path);
+    finalVals.push(cur);
+  }
+
+  // パーセンタイル計算
+  const sorted=[...finalVals].sort((a,b)=>a-b);
+  const p25=sorted[Math.floor(N*0.25)];
+  const p50=sorted[Math.floor(N*0.50)];
+  const p75=sorted[Math.floor(N*0.75)];
+  const maxVal=sorted[Math.floor(N*0.95)]*1.05;
+
+  const toX=yr=>PAD.l+(yr/YEARS)*IW;
+  const toY=v=>PAD.t+IH-Math.min(1,(v/maxVal))*IH;
+
+  // グリッド
+  ctx.strokeStyle='rgba(124,92,252,.06)'; ctx.lineWidth=1;
+  [0.25,0.5,0.75,1].forEach(r=>{
+    const y=PAD.t+IH*(1-r);
+    ctx.beginPath(); ctx.moveTo(PAD.l,y); ctx.lineTo(W-PAD.r,y); ctx.stroke();
+    ctx.fillStyle='rgba(139,138,168,.5)'; ctx.font='10px Inter'; ctx.textAlign='right';
+    ctx.fillText('¥'+(maxVal*r/10000).toFixed(0)+'万',PAD.l-6,y+3);
+  });
+  [0,2,4,6,8,10].forEach(yr=>{
+    const x=toX(yr);
+    ctx.beginPath(); ctx.moveTo(x,PAD.t); ctx.lineTo(x,H-PAD.b); ctx.stroke();
+    ctx.fillStyle='rgba(139,138,168,.5)'; ctx.font='10px Inter'; ctx.textAlign='center';
+    ctx.fillText((2026+yr)+'',x,H-PAD.b+14);
+  });
+
+  // パス描画（薄く）
+  ctx.lineWidth=0.4;
+  allPaths.forEach(path=>{
+    ctx.beginPath(); ctx.moveTo(toX(0),toY(TOTAL));
+    // モンテカルロは終値のみ記録しているのでランダムウォーク再生成
+    let cur=TOTAL;
+    for(let yr=1;yr<=YEARS;yr++){
+      for(let m=0;m<12;m++) cur=cur*(1+mr+mr_risk*randn())+p.monthly;
+      ctx.lineTo(toX(yr),toY(cur));
+    }
+    const endPct=cur/maxVal;
+    ctx.strokeStyle=endPct>0.7?'rgba(34,211,238,.06)':endPct>0.4?'rgba(167,139,250,.06)':'rgba(248,113,113,.06)';
+    ctx.stroke();
+  });
+
+  // パーセンタイルラインを簡略表示（終点のみマーク）
+  const drawPercentileLine=(val,color,dash=[])=>{
+    const frac=val/maxVal;
+    const y=PAD.t+IH*(1-Math.min(1,frac));
+    ctx.setLineDash(dash); ctx.strokeStyle=color; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(PAD.l,toY(TOTAL));
+    // 直線で近似（簡略）
+    ctx.bezierCurveTo(toX(5),toY(TOTAL*1.2),toX(8),y,toX(YEARS),y);
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle=color; ctx.font='bold 10px Inter'; ctx.textAlign='left';
+    ctx.fillText('¥'+(val/10000).toFixed(0)+'万',W-PAD.r+2,y+3);
+  };
+  drawPercentileLine(p75,'#10b981',[6,3]);
+  drawPercentileLine(p50,'#22d3ee',[]);
+  drawPercentileLine(p25,'#f87171',[6,3]);
+
+  // 1億ライン
+  if(maxVal>100000000){
+    const y=toY(100000000);
+    ctx.strokeStyle='rgba(245,158,11,.4)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(PAD.l,y); ctx.lineTo(W-PAD.r,y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(245,158,11,.8)'; ctx.font='10px Inter'; ctx.textAlign='right';
+    ctx.fillText('¥1億',W-PAD.r-2,y-4);
+  }
+
+  // 結果テキスト
+  ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='11px Inter'; ctx.textAlign='left';
+  ctx.fillText(`10年後 中央値: ¥${(p50/10000).toFixed(0)}万 / 75%ile: ¥${(p75/10000).toFixed(0)}万 / 25%ile: ¥${(p25/10000).toFixed(0)}万`, PAD.l, PAD.t+14);
+
+  return {p25,p50,p75};
+}
+
+// ── ④ シャープレシオバー ────────────────────
+function drawSharpeBars() {
+  const data = CATEGORIES.map(c=>({
+    name:c.name, color:c.color,
+    sharpe:(c.ret-RF)/c.risk,
+    amount:c.amount
+  })).filter(c=>c.sharpe>0).sort((a,b)=>b.sharpe-a.sharpe);
+
+  const maxS = data[0].sharpe;
+  const html = data.map(d=>`
+    <div class="dist-row">
+      <div class="dist-label" style="color:${d.color}">${d.name}</div>
+      <div class="dist-bar-wrap">
+        <div class="dist-bar" style="width:${(d.sharpe/maxS*100).toFixed(0)}%;background:${d.color}88"></div>
+      </div>
+      <div class="dist-val" style="color:${d.sharpe>0.7?'#10b981':d.sharpe>0.4?'#f59e0b':'#f87171'}">${d.sharpe.toFixed(2)}</div>
+    </div>
+  `).join('');
+  document.getElementById('sharpe-bars').innerHTML = html;
+}
+
+// ── ⑤ 分布サマリー ──────────────────────────
+function drawDist() {
+  const render = (mode, elId) => {
+    const p = MC_PARAMS[mode];
+    const N=500, YEARS=10;
+    const mr=p.ret/12, mr_risk=p.risk/Math.sqrt(12);
+    const finals=[];
+    for(let i=0;i<N;i++){
+      let cur=TOTAL;
+      for(let m=0;m<YEARS*12;m++) cur=cur*(1+mr+mr_risk*randn())+p.monthly;
+      finals.push(cur);
+    }
+    finals.sort((a,b)=>a-b);
+    const color = mode==='current'?'#a78bfa':'#f59e0b';
+    const rows=[
+      {label:'悲観（10%ile）',val:finals[Math.floor(N*0.10)]},
+      {label:'下位（25%ile）',val:finals[Math.floor(N*0.25)]},
+      {label:'中央値（50%ile）',val:finals[Math.floor(N*0.50)]},
+      {label:'上位（75%ile）',val:finals[Math.floor(N*0.75)]},
+      {label:'楽観（90%ile）',val:finals[Math.floor(N*0.90)]},
+    ];
+    const maxVal = rows[4].val;
+    document.getElementById(elId).innerHTML = rows.map(r=>`
+      <div class="dist-row">
+        <div class="dist-label">${r.label}</div>
+        <div class="dist-bar-wrap">
+          <div class="dist-bar" style="width:${(r.val/maxVal*100).toFixed(0)}%;background:${color}88;transition:width 1s ease"></div>
+        </div>
+        <div class="dist-val" style="color:${color}">¥${(r.val/10000).toFixed(0)}万</div>
+      </div>
+    `).join('');
+  };
+  render('current','dist-current');
+  render('optimized','dist-optimized');
+}
+
+// 初期描画
+window.addEventListener('load',()=>{
+  drawTreemap();
+  drawFrontier();
+  drawMC('current');
+  drawSharpeBars();
+  drawDist();
+});
+window.addEventListener('resize',()=>{
+  drawTreemap();
+  drawFrontier();
+  drawMC(currentMode);
+});
+</script>
+</body>
+</html>

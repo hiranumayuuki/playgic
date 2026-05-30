@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eBay 利益計算ツール — Playgic Tools</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#080810; --bg2:#0d0d1a; --accent:#7c5cfc; --accent2:#a78bfa;
+      --cyan:#22d3ee; --green:#10b981; --red:#f87171; --white:#f1f0ff; --gray:#8b8aa8; --border:rgba(124,92,252,.2);
+    }
+    body { background:var(--bg); color:var(--white); font-family:'Inter',sans-serif; min-height:100vh; }
+    body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(124,92,252,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,252,.04) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; z-index:0; }
+    nav { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 32px; height:64px; background:rgba(8,8,16,.9); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+    .nav-logo { font-size:14px; font-weight:800; letter-spacing:.15em; background:linear-gradient(135deg,var(--accent2),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .nav-back { font-size:13px; color:var(--gray); text-decoration:none; transition:color .2s; }
+    .nav-back:hover { color:var(--white); }
+    .wrap { max-width:1100px; margin:0 auto; padding:48px 32px; position:relative; z-index:1; }
+    .page-header { margin-bottom:40px; }
+    .page-header h1 { font-size:32px; font-weight:800; margin-bottom:8px; }
+    .page-header p { color:var(--gray); font-size:14px; line-height:1.7; }
+    .top-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:32px; }
+    @media(max-width:700px) { .top-grid { grid-template-columns:1fr; } }
+    .card { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:28px 24px; }
+    .card-title { font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--accent2); margin-bottom:20px; }
+    .field { margin-bottom:16px; }
+    .field label { display:block; font-size:12px; font-weight:500; color:var(--gray); margin-bottom:6px; }
+    .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .field input, .field select { width:100%; background:rgba(124,92,252,.08); border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-size:15px; color:var(--white); font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
+    .field input:focus { border-color:var(--accent2); }
+    .result-row { display:flex; justify-content:space-between; align-items:baseline; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.05); }
+    .result-row:last-child { border-bottom:none; }
+    .result-label { font-size:13px; color:var(--gray); }
+    .result-val { font-size:18px; font-weight:700; }
+    .result-val.green { background:linear-gradient(135deg,var(--green),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .result-val.red { color:var(--red); }
+    .result-val.white { color:var(--white); }
+    /* 商品リスト */
+    .items-section { margin-bottom:32px; }
+    .items-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    .items-header h2 { font-size:14px; font-weight:700; }
+    .add-btn { background:rgba(124,92,252,.15); border:1px solid var(--border); border-radius:8px; padding:8px 16px; font-size:12px; font-weight:600; color:var(--accent2); cursor:pointer; transition:all .2s; }
+    .add-btn:hover { background:rgba(124,92,252,.25); }
+    .item-row { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr 40px; gap:10px; align-items:center; background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:10px; }
+    .item-row input { background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,.1); border-radius:0; padding:4px 0; font-size:13px; color:var(--white); font-family:'Inter',sans-serif; outline:none; width:100%; }
+    .item-row input:focus { border-bottom-color:var(--accent2); }
+    .item-profit { font-size:13px; font-weight:700; }
+    .del-btn { background:none; border:none; color:var(--gray); cursor:pointer; font-size:18px; transition:color .2s; }
+    .del-btn:hover { color:var(--red); }
+    .col-label { font-size:10px; color:var(--gray); letter-spacing:.05em; text-transform:uppercase; }
+    .items-header-row { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr 40px; gap:10px; padding:0 16px; margin-bottom:6px; }
+    /* 月間サマリー */
+    .summary { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+    @media(max-width:700px) { .summary { grid-template-columns:1fr 1fr; } }
+    .sum-card { background:rgba(124,92,252,.07); border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center; }
+    .sum-label { font-size:11px; color:var(--gray); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; }
+    .sum-val { font-size:28px; font-weight:800; letter-spacing:-.02em; }
+    .sum-val.green { background:linear-gradient(135deg,var(--green),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .sum-val.white { color:var(--white); }
+    .save-btn { width:100%; background:linear-gradient(135deg,var(--accent),#5b3fd4); border:none; border-radius:10px; padding:14px; font-size:14px; font-weight:700; color:#fff; cursor:pointer; transition:all .2s; }
+    .save-btn:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(124,92,252,.4); }
+    .saved-msg { text-align:center; font-size:12px; color:var(--green); margin-top:10px; height:16px; }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-back">← Playgic Tools</a>
+  <div class="nav-logo">eBay 利益計算ツール</div>
+  <div style="width:120px"></div>
+</nav>
+<div class="wrap">
+  <div class="page-header">
+    <h1>📦 eBay 利益計算ツール</h1>
+    <p>仕入れ〜販売の利益を商品ごとに計算。月間収益をFIREシミュレーターに自動連携。</p>
+  </div>
+
+  <!-- 月間サマリー -->
+  <div class="summary">
+    <div class="sum-card"><div class="sum-label">月間売上</div><div class="sum-val white" id="s-sales">¥0</div></div>
+    <div class="sum-card"><div class="sum-label">月間コスト</div><div class="sum-val white" id="s-cost">¥0</div></div>
+    <div class="sum-card"><div class="sum-label">月間純利益</div><div class="sum-val green" id="s-profit">¥0</div></div>
+    <div class="sum-card"><div class="sum-label">平均利益率</div><div class="sum-val green" id="s-margin">0%</div></div>
+  </div>
+
+  <!-- 商品リスト -->
+  <div class="items-section">
+    <div class="items-header">
+      <h2>商品リスト</h2>
+      <button class="add-btn" onclick="addItem()">+ 商品を追加</button>
+    </div>
+    <div class="items-header-row">
+      <span class="col-label">商品名</span>
+      <span class="col-label">仕入値(¥)</span>
+      <span class="col-label">販売価格(¥)</span>
+      <span class="col-label">送料(¥)</span>
+      <span class="col-label">利益</span>
+      <span></span>
+    </div>
+    <div id="items-list"></div>
+  </div>
+
+  <!-- FIRE連携 -->
+  <div class="card">
+    <div class="card-title">FIREシミュレーターへ連携</div>
+    <div class="result-row"><span class="result-label">今月の純利益</span><span class="result-val green" id="r-monthly">¥0</span></div>
+    <div class="result-row"><span class="result-label">年換算収益</span><span class="result-val green" id="r-yearly">¥0</span></div>
+    <div class="result-row"><span class="result-label">10年累計（複利なし）</span><span class="result-val white" id="r-10y">¥0</span></div>
+    <button class="save-btn" onclick="save()">✓ 月間収益をFIREシミュレーターに共有する</button>
+    <div class="saved-msg" id="saved-msg"></div>
+  </div>
+</div>
+
+<script>
+  let items = [];
+  const EBAY_FEE_RATE = 0.13; // eBay手数料13%
+
+  function addItem(name='', buy=0, sell=0, ship=0) {
+    items.push({ name, buy, sell, ship });
+    render();
+  }
+
+  function removeItem(i) { items.splice(i,1); render(); }
+
+  function updateItem(i, key, val) { items[i][key] = Number(val) || 0; calc(); }
+
+  function render() {
+    const list = document.getElementById('items-list');
+    list.innerHTML = items.map((it,i) => `
+      <div class="item-row">
+        <input type="text"   value="${it.name}"  placeholder="例：Canon FD 50mm" oninput="items[${i}].name=this.value">
+        <input type="number" value="${it.buy||''}"  placeholder="0" oninput="updateItem(${i},'buy',this.value)">
+        <input type="number" value="${it.sell||''}" placeholder="0" oninput="updateItem(${i},'sell',this.value)">
+        <input type="number" value="${it.ship||''}" placeholder="0" oninput="updateItem(${i},'ship',this.value)">
+        <span class="item-profit" id="ip-${i}">¥0</span>
+        <button class="del-btn" onclick="removeItem(${i})">×</button>
+      </div>
+    `).join('');
+    calc();
+  }
+
+  function calc() {
+    let totalSales=0, totalCost=0, totalProfit=0;
+    items.forEach((it,i) => {
+      const sell = it.sell || 0;
+      const fee  = sell * EBAY_FEE_RATE;
+      const cost = (it.buy||0) + (it.ship||0) + fee;
+      const profit = sell - cost;
+      totalSales  += sell;
+      totalCost   += cost;
+      totalProfit += profit;
+      const el = document.getElementById('ip-'+i);
+      if (el) {
+        el.textContent = '¥' + Math.round(profit).toLocaleString();
+        el.style.color = profit >= 0 ? 'var(--green)' : 'var(--red)';
+      }
+    });
+    const margin = totalSales > 0 ? (totalProfit/totalSales*100) : 0;
+    document.getElementById('s-sales').textContent  = '¥' + Math.round(totalSales).toLocaleString();
+    document.getElementById('s-cost').textContent   = '¥' + Math.round(totalCost).toLocaleString();
+    document.getElementById('s-profit').textContent = '¥' + Math.round(totalProfit).toLocaleString();
+    document.getElementById('s-margin').textContent = margin.toFixed(1)+'%';
+    document.getElementById('r-monthly').textContent = '¥' + Math.round(totalProfit).toLocaleString();
+    document.getElementById('r-yearly').textContent  = '¥' + Math.round(totalProfit*12).toLocaleString();
+    document.getElementById('r-10y').textContent     = '¥' + Math.round(totalProfit*12*10).toLocaleString();
+  }
+
+  function save() {
+    const monthly = items.reduce((acc,it) => {
+      const sell=it.sell||0; const profit=sell - (it.buy||0) - (it.ship||0) - sell*0.13;
+      return acc+profit;
+    },0);
+    const d = JSON.parse(localStorage.getItem('playgic_data')||'{}');
+    d.ebay = Math.round(monthly);
+    localStorage.setItem('playgic_data', JSON.stringify(d));
+    const msg = document.getElementById('saved-msg');
+    msg.textContent = '✓ 保存しました — FIREシミュレーターに反映されました';
+    setTimeout(()=>{ msg.textContent=''; },3000);
+  }
+
+  // 初期データ（30日実験の想定）
+  addItem('Canon FD 50mm f1.4', 3000, 12000, 1500);
+  addItem('Pentax Super-Takumar 55mm', 2500, 9000, 1200);
+  addItem('レトロゲーム #1', 500, 3500, 800);
+  addItem('レトロゲーム #2', 800, 4000, 800);
+</script>
+</body>
+</html>

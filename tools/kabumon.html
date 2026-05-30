@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>株モン — ティッカーからモンスターが生まれる</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Zen+Dots&display=swap');
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+    :root {
+      --bg:#05050f; --bg2:#0a0a1a; --bg3:#0f0f22;
+      --accent:#7c5cfc; --accent2:#a78bfa; --cyan:#22d3ee;
+      --white:#f1f0ff; --gray:#8b8aa8; --border:rgba(124,92,252,.2);
+    }
+
+    body {
+      background:var(--bg); color:var(--white);
+      font-family:'Inter',sans-serif; min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(124,92,252,.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(124,92,252,.03) 1px,transparent 1px);
+      background-size:60px 60px; pointer-events:none; z-index:0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position:sticky; top:0; z-index:200;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 28px; height:58px;
+      background:rgba(5,5,15,.95); backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-logo {
+      font-family:'Zen Dots',sans-serif; font-size:20px;
+      background:linear-gradient(135deg,#f59e0b,#ef4444,#a78bfa,#22d3ee);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .nav-back { font-size:13px; color:var(--gray); text-decoration:none; transition:color .2s; }
+    .nav-back:hover { color:var(--white); }
+    .nav-right { display:flex; align-items:center; gap:16px; }
+    .party-count {
+      background:rgba(124,92,252,.15); border:1px solid var(--border);
+      border-radius:999px; padding:4px 14px;
+      font-size:12px; font-weight:700; color:var(--accent2);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position:relative; z-index:1;
+      text-align:center; padding:56px 24px 40px;
+    }
+    .hero-tag {
+      display:inline-block; margin-bottom:20px;
+      background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3);
+      border-radius:999px; padding:5px 16px;
+      font-size:12px; font-weight:600; color:#f59e0b; letter-spacing:.1em;
+    }
+    .hero h1 {
+      font-family:'Zen Dots',sans-serif;
+      font-size:clamp(36px,8vw,72px); line-height:1; margin-bottom:16px;
+      background:linear-gradient(135deg,#f1f0ff 30%,#a78bfa 65%,#22d3ee 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .hero p { font-size:16px; color:var(--gray); margin-bottom:40px; }
+
+    /* ── 入力 ── */
+    .input-stage {
+      display:flex; align-items:center; justify-content:center;
+      gap:12px; flex-wrap:wrap; margin-bottom:12px;
+    }
+    .ticker-input {
+      background:rgba(124,92,252,.08); border:2px solid var(--border);
+      border-radius:12px; padding:16px 24px;
+      font-size:28px; font-weight:900; font-family:'Zen Dots',sans-serif;
+      color:var(--white); text-transform:uppercase; letter-spacing:.15em;
+      text-align:center; width:200px; outline:none;
+      transition:border-color .3s, box-shadow .3s;
+    }
+    .ticker-input:focus {
+      border-color:var(--accent2);
+      box-shadow:0 0 0 4px rgba(167,139,250,.15);
+    }
+    .ticker-input::placeholder { color:#333; font-size:18px; letter-spacing:.1em; }
+    .generate-btn {
+      background:linear-gradient(135deg,#f59e0b,#ef4444);
+      border:none; border-radius:12px; padding:16px 32px;
+      font-size:18px; font-weight:900; font-family:'Zen Dots',sans-serif;
+      color:#fff; cursor:pointer; transition:all .2s;
+      letter-spacing:.05em; white-space:nowrap;
+    }
+    .generate-btn:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(245,158,11,.4); }
+    .generate-btn:active { transform:translateY(0); }
+    .input-hint { font-size:12px; color:var(--gray); text-align:center; }
+
+    /* ── 召喚ステージ ── */
+    .summon-stage {
+      position:relative; z-index:1;
+      display:flex; flex-direction:column; align-items:center;
+      min-height:500px; padding:40px 24px;
+    }
+
+    /* 空の状態 */
+    .empty-state {
+      display:flex; flex-direction:column; align-items:center;
+      gap:16px; opacity:.3; margin-top:60px;
+    }
+    .empty-state .empty-icon { font-size:80px; }
+    .empty-state p { font-size:16px; color:var(--gray); font-family:'Zen Dots',sans-serif; }
+
+    /* ── ディスク（召喚アニメ）── */
+    .disc-wrap {
+      display:none; flex-direction:column; align-items:center; gap:24px;
+    }
+
+    .disc {
+      width:220px; height:220px; border-radius:50%;
+      position:relative; display:flex; align-items:center; justify-content:center;
+    }
+
+    .disc-ring {
+      position:absolute; inset:-4px; border-radius:50%;
+      background:conic-gradient(from 0deg, #f59e0b, #ef4444, #a78bfa, #22d3ee, #f59e0b);
+      animation:disc-rotate 0.6s linear infinite;
+    }
+
+    .disc-inner {
+      position:absolute; inset:4px; border-radius:50%;
+      background:radial-gradient(circle at 40% 40%, #1a1a3a, #05050f);
+      display:flex; align-items:center; justify-content:center;
+      flex-direction:column; gap:4px;
+    }
+
+    .disc-ticker {
+      font-family:'Zen Dots',sans-serif; font-size:28px; font-weight:900;
+      background:linear-gradient(135deg,#f59e0b,#ef4444);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      letter-spacing:.1em;
+    }
+
+    .disc-label { font-size:10px; color:var(--gray); letter-spacing:.15em; text-transform:uppercase; }
+
+    @keyframes disc-rotate {
+      from { transform:rotate(0deg); }
+      to   { transform:rotate(360deg); }
+    }
+
+    @keyframes disc-explode {
+      0%   { transform:scale(1); opacity:1; filter:brightness(1); }
+      40%  { transform:scale(1.4); opacity:1; filter:brightness(3) saturate(2); }
+      100% { transform:scale(0); opacity:0; }
+    }
+
+    @keyframes flash-white {
+      0%,100% { opacity:0; }
+      50%     { opacity:1; }
+    }
+
+    .disc-loading-text {
+      font-family:'Zen Dots',sans-serif; font-size:14px; color:var(--gray);
+      animation:pulse-text 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse-text {
+      0%,100% { opacity:.4; }
+      50%     { opacity:1; }
+    }
+
+    /* フラッシュ */
+    .flash-overlay {
+      position:fixed; inset:0; background:#fff;
+      pointer-events:none; z-index:999; opacity:0;
+    }
+
+    /* ── モンスターカード ── */
+    .monster-card {
+      display:none; flex-direction:column; align-items:center; gap:0;
+      max-width:480px; width:100%;
+    }
+
+    .rarity-banner {
+      font-family:'Zen Dots',sans-serif; font-size:11px; letter-spacing:.3em;
+      padding:6px 24px; border-radius:999px 999px 0 0;
+      text-transform:uppercase; font-weight:700;
+    }
+
+    .card-body {
+      width:100%; border:2px solid; border-radius:0 0 20px 20px;
+      padding:32px; position:relative; overflow:hidden;
+    }
+
+    .card-glow {
+      position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(ellipse at 50% 0%, var(--card-glow-color,rgba(124,92,252,.15)) 0%, transparent 70%);
+    }
+
+    .mon-emoji {
+      font-size:120px; line-height:1; text-align:center;
+      display:block; position:relative; z-index:1;
+      animation:mon-float 3s ease-in-out infinite;
+      filter:drop-shadow(0 0 20px var(--mon-shadow,rgba(124,92,252,.5)));
+    }
+
+    @keyframes mon-float {
+      0%,100% { transform:translateY(0); }
+      50%     { transform:translateY(-12px); }
+    }
+
+    @keyframes mon-appear {
+      0%   { transform:scale(0) rotate(-15deg); opacity:0; filter:brightness(3); }
+      60%  { transform:scale(1.15) rotate(3deg); opacity:1; filter:brightness(1.5); }
+      100% { transform:scale(1) rotate(0deg); opacity:1; filter:brightness(1); }
+    }
+
+    .mon-name {
+      font-family:'Zen Dots',sans-serif; font-size:32px;
+      text-align:center; margin:16px 0 4px;
+      position:relative; z-index:1;
+    }
+
+    .mon-title {
+      font-size:13px; color:var(--gray); text-align:center;
+      margin-bottom:20px; position:relative; z-index:1; letter-spacing:.03em;
+    }
+
+    .mon-attr {
+      display:inline-flex; align-items:center; gap:6px;
+      border-radius:999px; padding:5px 16px;
+      font-size:12px; font-weight:700; margin:0 auto 20px;
+      display:flex; justify-content:center;
+      position:relative; z-index:1;
+    }
+
+    .mon-lore {
+      font-size:13px; color:var(--gray); line-height:1.8;
+      text-align:center; margin-bottom:24px;
+      position:relative; z-index:1;
+      background:rgba(0,0,0,.2); border-radius:8px; padding:12px 16px;
+      border-left:2px solid var(--card-color,var(--accent));
+    }
+
+    .mon-stats {
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:10px; position:relative; z-index:1; margin-bottom:24px;
+    }
+
+    .stat-item {
+      background:rgba(0,0,0,.2); border-radius:8px; padding:10px 14px;
+    }
+    .stat-item-label { font-size:10px; color:var(--gray); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+    .stat-item-bar { height:4px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; margin-bottom:4px; }
+    .stat-item-fill { height:100%; border-radius:999px; }
+    .stat-item-val { font-size:13px; font-weight:700; }
+
+    .card-actions {
+      display:flex; gap:10px; position:relative; z-index:1;
+    }
+
+    .add-party-btn {
+      flex:1; background:linear-gradient(135deg,var(--accent),#5b3fd4);
+      border:none; border-radius:10px; padding:13px;
+      font-size:14px; font-weight:700; color:#fff;
+      cursor:pointer; transition:all .2s;
+    }
+    .add-party-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(124,92,252,.4); }
+
+    .share-btn {
+      background:rgba(0,0,0,.4); border:1px solid rgba(255,255,255,.15);
+      border-radius:10px; padding:13px 18px;
+      font-size:14px; font-weight:700; color:var(--white);
+      cursor:pointer; transition:all .2s;
+    }
+    .share-btn:hover { background:rgba(0,0,0,.6); }
+
+    /* ── パーティ ── */
+    .party-section {
+      position:relative; z-index:1;
+      max-width:900px; margin:0 auto; padding:0 24px 80px;
+    }
+
+    .party-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:20px; padding-top:40px;
+      border-top:1px solid var(--border);
+    }
+
+    .party-title {
+      font-family:'Zen Dots',sans-serif; font-size:18px;
+      background:linear-gradient(135deg,var(--accent2),var(--cyan));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+
+    .clear-btn {
+      background:transparent; border:1px solid rgba(248,113,113,.3);
+      border-radius:8px; padding:6px 14px;
+      font-size:12px; color:#f87171; cursor:pointer; transition:all .2s;
+    }
+    .clear-btn:hover { background:rgba(248,113,113,.1); }
+
+    .party-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+      gap:12px;
+    }
+
+    .party-mon {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:14px; padding:16px 12px; text-align:center;
+      cursor:pointer; transition:all .2s; position:relative;
+    }
+    .party-mon:hover { transform:translateY(-4px); border-color:rgba(124,92,252,.5); }
+
+    .party-mon-emoji { font-size:48px; display:block; margin-bottom:8px; line-height:1; }
+    .party-mon-name { font-family:'Zen Dots',sans-serif; font-size:11px; margin-bottom:2px; }
+    .party-mon-ticker { font-size:10px; color:var(--gray); }
+    .party-mon-rarity { position:absolute; top:8px; right:8px; font-size:10px; }
+
+    .party-empty {
+      grid-column:1/-1; text-align:center; padding:40px;
+      color:var(--gray); font-size:14px; opacity:.5;
+    }
+
+    /* ── スパークル ── */
+    .sparkle-container { position:fixed; inset:0; pointer-events:none; z-index:100; }
+    .sparkle {
+      position:absolute; pointer-events:none;
+      animation:sparkle-anim .8s ease-out forwards;
+      font-size:24px; opacity:0;
+    }
+    @keyframes sparkle-anim {
+      0%   { opacity:0; transform:scale(0) translate(0,0); }
+      30%  { opacity:1; transform:scale(1.2) translate(var(--dx),var(--dy)); }
+      100% { opacity:0; transform:scale(.5) translate(calc(var(--dx)*2),calc(var(--dy)*2)); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="flash-overlay" id="flash"></div>
+<div class="sparkle-container" id="sparkles"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-back">← Playgic Tools</a>
+  <div class="nav-logo">株モン</div>
+  <div class="nav-right">
+    <div class="party-count">パーティ: <span id="party-count">0</span>/6</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Inspired by モンスターファーム</div>
+  <h1>株モン</h1>
+  <p>ティッカーシンボルを入れると、モンスターが生まれる。</p>
+
+  <div class="input-stage">
+    <input class="ticker-input" id="ticker-input" type="text"
+      placeholder="NVDA" maxlength="6"
+      oninput="this.value=this.value.toUpperCase()"
+      onkeydown="if(event.key==='Enter')generate()">
+    <button class="generate-btn" onclick="generate()">⚡ 召喚</button>
+  </div>
+  <div class="input-hint">例: NVDA / AAPL / QQQ / BTC / SMH / TSLA</div>
+</div>
+
+<!-- 召喚ステージ -->
+<div class="summon-stage" id="summon-stage">
+
+  <!-- 空の状態 -->
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon">🌑</div>
+    <p>ティッカーを入れて召喚せよ</p>
+  </div>
+
+  <!-- ディスク -->
+  <div class="disc-wrap" id="disc-wrap">
+    <div class="disc">
+      <div class="disc-ring" id="disc-ring"></div>
+      <div class="disc-inner">
+        <div class="disc-ticker" id="disc-ticker">—</div>
+        <div class="disc-label">loading...</div>
+      </div>
+    </div>
+    <div class="disc-loading-text" id="loading-text">モンスターが目覚めている...</div>
+  </div>
+
+  <!-- モンスターカード -->
+  <div class="monster-card" id="monster-card">
+    <div class="rarity-banner" id="rarity-banner">COMMON</div>
+    <div class="card-body" id="card-body">
+      <div class="card-glow"></div>
+      <span class="mon-emoji" id="mon-emoji">🌱</span>
+      <div class="mon-name" id="mon-name">—</div>
+      <div class="mon-title" id="mon-title">—</div>
+      <div class="mon-attr" id="mon-attr">—</div>
+      <div class="mon-lore" id="mon-lore">—</div>
+      <div class="mon-stats" id="mon-stats"></div>
+      <div class="card-actions">
+        <button class="add-party-btn" id="add-party-btn" onclick="addToParty()">＋ パーティに加える</button>
+        <button class="share-btn" onclick="shareX()">𝕏 シェア</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- パーティ -->
+<div class="party-section">
+  <div class="party-header">
+    <div class="party-title">MY PARTY</div>
+    <button class="clear-btn" onclick="clearParty()">リセット</button>
+  </div>
+  <div class="party-grid" id="party-grid">
+    <div class="party-empty">まだモンスターがいない。ティッカーを入れて召喚せよ。</div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// データ定義
+// ─────────────────────────────────────────────
+
+const LEGENDARY_STOCKS = {
+  'NVDA':  { name:'ナスダリア',   title:'半導体の覇者',         emoji:'⚡', attr:'雷',  attrColor:'#76b900', rarity:'LEGENDARY', lore:'AI革命の核心から生まれた存在。その力は市場全体を動かす。時価総額の重さは世界の命運に等しい。', atk:99,def:60,spd:88,luk:75 },
+  'AAPL':  { name:'アップロン',   title:'エコシステムの守護神',   emoji:'🍎', attr:'大地',attrColor:'#22c55e', rarity:'LEGENDARY', lore:'1兆ドルの王国を一代で築いた神。信者は世界に数億人。その牙城を崩す者はまだいない。', atk:80,def:95,spd:72,luk:90 },
+  'QQQ':   { name:'ナスドラゴン', title:'NASDAQ100の化身',       emoji:'🐉', attr:'雷',  attrColor:'#6366f1', rarity:'LEGENDARY', lore:'100の魂が融合して生まれた複合体。技術革新の象徴にして、指数運用の王者。', atk:88,def:75,spd:80,luk:85 },
+  'TSLA':  { name:'テスラゴン',   title:'電気の野生児',           emoji:'🌪', attr:'炎',  attrColor:'#ef4444', rarity:'EPIC',      lore:'常識を焼き尽くして走る。予測不能だが圧倒的な引力を持つ。イーロンの意志が乗り移った存在。', atk:92,def:40,spd:95,luk:55 },
+  'AMZN':  { name:'アマゾニウム', title:'物流と雲の支配者',       emoji:'📦', attr:'大地',attrColor:'#f59e0b', rarity:'LEGENDARY', lore:'あらゆる物を飲み込む巨大な渦。ECとクラウドで世界インフラを握る。', atk:85,def:85,spd:78,luk:80 },
+  'MSFT':  { name:'マイクロフォート',title:'クラウドの城主',      emoji:'🏰', attr:'大地',attrColor:'#0078d4', rarity:'LEGENDARY', lore:'堅牢な城壁で守られた王国。AIとクラウドで次代を制する盤石の存在。', atk:82,def:96,spd:70,luk:88 },
+  'META':  { name:'メタモルファ', title:'仮想世界の支配者',       emoji:'🌐', attr:'混沌',attrColor:'#1877f2', rarity:'EPIC',      lore:'30億の人間を飲み込むメタバースの神。何度でも変化し、何度でも蘇る。', atk:78,def:65,spd:82,luk:70 },
+  'GOOGL': { name:'グーグリア',   title:'全知の神',               emoji:'👁', attr:'光',  attrColor:'#4285f4', rarity:'LEGENDARY', lore:'世界中の情報を見通す全知の目。知識は最強の武器。その検索は宇宙規模の思考だ。', atk:86,def:88,spd:75,luk:92 },
+  'GOOG':  { name:'グーグリア',   title:'全知の神',               emoji:'👁', attr:'光',  attrColor:'#4285f4', rarity:'LEGENDARY', lore:'世界中の情報を見通す全知の目。知識は最強の武器。', atk:86,def:88,spd:75,luk:92 },
+  'BTC':   { name:'ビットクロス', title:'混沌の破壊神',           emoji:'🌀', attr:'混沌',attrColor:'#f7931a', rarity:'MYTHIC',    lore:'既存の金融秩序を破壊するために生まれた神。誰にも制御できない究極の混沌。21万枚の呪縛の中に宿る意志。', atk:100,def:30,spd:100,luk:50 },
+  'ETH':   { name:'イーサリアン', title:'スマートの魔導師',       emoji:'🔮', attr:'混沌',attrColor:'#627eea', rarity:'EPIC',      lore:'ブロックチェーンの魔法を操る存在。DeFiの守護者にして、Web3の扉を開く鍵。', atk:85,def:55,spd:88,luk:65 },
+  'SPY':   { name:'スパイダーS',  title:'S&P500の守護者',         emoji:'🕷', attr:'複合',attrColor:'#6366f1', rarity:'LEGENDARY', lore:'500の魂が結束した最強の盾。市場全体の意志を体現する。個別株との戦いを拒み、全体に宿る。', atk:75,def:90,spd:70,luk:95 },
+  'SMH':   { name:'セミコンドラ', title:'半導体軍団の司令官',     emoji:'💻', attr:'雷',  attrColor:'#8b5cf6', rarity:'EPIC',      lore:'チップの覇権を握る者。AI時代の真の支配者はここにいる。NVDAを核とした半導体連合軍の化身。', atk:94,def:65,spd:85,luk:72 },
+  'AGG':   { name:'アグモン',     title:'債券の守護霊',           emoji:'🛡', attr:'大地',attrColor:'#6b7280', rarity:'COMMON',    lore:'静かに、確実に守る。攻撃力は皆無だが、嵐の中でも揺るがない。金利の海に浮かぶ不沈艦。', atk:10,def:99,spd:20,luk:85 },
+  'BND':   { name:'バンドモン',   title:'米国債の化身',           emoji:'🏛', attr:'大地',attrColor:'#6b7280', rarity:'COMMON',    lore:'米国全体の信用を背負う存在。リスクオフの嵐が来るたびに輝く守護者。', atk:8,def:98,spd:18,luk:88 },
+  'VTI':   { name:'ブイタイタン', title:'全米の巨人',             emoji:'🗽', attr:'複合',attrColor:'#3b82f6', rarity:'LEGENDARY', lore:'アメリカ全体の力を宿した巨人。多様性が最大の強み。時価総額加重の重力に従い動く。', atk:77,def:88,spd:72,luk:94 },
+  'GLD':   { name:'ゴールデモン', title:'黄金の古代神',           emoji:'🥇', attr:'大地',attrColor:'#eab308', rarity:'EPIC',      lore:'数千年の歴史を持つ安全の象徴。インフレの炎の中でのみ輝く不滅の存在。', atk:40,def:92,spd:35,luk:88 },
+  'SPYD':  { name:'スパイダード', title:'高配当の供給者',         emoji:'💰', attr:'大地',attrColor:'#10b981', rarity:'UNCOMMON',  lore:'配当を糧に生きる安定型。成長はしないが、着実に現金を生み出す農耕型の存在。', atk:30,def:80,spd:40,luk:75 },
+  'VYM':   { name:'ブイワイモン', title:'配当貴族の守護者',       emoji:'👑', attr:'大地',attrColor:'#10b981', rarity:'UNCOMMON',  lore:'配当増配を誓った貴族たちの集合体。地味だが、長期では最強クラスの生存力を持つ。', atk:35,def:85,spd:38,luk:80 },
+  'IEF':   { name:'イーフモン',   title:'中期債券の守り人',       emoji:'🔒', attr:'大地',attrColor:'#6b7280', rarity:'COMMON',    lore:'金利の波に揺れながらも守り続ける。株式の嵐が来たとき、最後の砦となる存在。', atk:12,def:95,spd:22,luk:82 },
+  'HYG':   { name:'ハイモン',     title:'ハイイールドの賭け師',   emoji:'🎰', attr:'炎',  attrColor:'#f59e0b', rarity:'UNCOMMON',  lore:'高い金利を貪る野心家。リスクと引き換えに大きなリターンを狙う。信用の綱渡り師。', atk:60,def:45,spd:65,luk:55 },
+  'ARKK':  { name:'アークノヴァ', title:'破壊的革新の預言者',     emoji:'🚀', attr:'炎',  attrColor:'#ef4444', rarity:'EPIC',      lore:'未来に賭けた預言者。激しく燃え上がり、激しく落ちる。イノベーションの炎の化身。', atk:96,def:20,spd:98,luk:40 },
+  'MSTR':  { name:'マイクロモン', title:'BTCホールダーの先駆者', emoji:'💎', attr:'混沌',attrColor:'#f7931a', rarity:'EPIC',      lore:'全資産をBitcoinに賭けた男の意志が宿る。極端な信念は時に世界を変える。', atk:98,def:15,spd:96,luk:45 },
+};
+
+const RARITIES = {
+  COMMON:    { color:'#6b7280', glow:'rgba(107,114,128,.2)',  bg:'rgba(107,114,128,.08)',  label:'C O M M O N' },
+  UNCOMMON:  { color:'#22c55e', glow:'rgba(34,197,94,.2)',   bg:'rgba(34,197,94,.08)',    label:'U N C O M M O N' },
+  RARE:      { color:'#3b82f6', glow:'rgba(59,130,246,.25)', bg:'rgba(59,130,246,.08)',   label:'R A R E' },
+  EPIC:      { color:'#a78bfa', glow:'rgba(167,139,250,.3)', bg:'rgba(167,139,250,.08)',  label:'E P I C' },
+  LEGENDARY: { color:'#f59e0b', glow:'rgba(245,158,11,.35)', bg:'rgba(245,158,11,.08)',   label:'L E G E N D A R Y' },
+  MYTHIC:    { color:'#ef4444', glow:'rgba(239,68,68,.4)',   bg:'rgba(239,68,68,.08)',    label:'M Y T H I C' },
+};
+
+const ATTRS = {
+  '雷':  { color:'#fbbf24', bg:'rgba(251,191,36,.12)' },
+  '大地':{ color:'#4ade80', bg:'rgba(74,222,128,.12)'  },
+  '炎':  { color:'#f97316', bg:'rgba(249,115,22,.12)'  },
+  '混沌':{ color:'#a78bfa', bg:'rgba(167,139,250,.12)' },
+  '光':  { color:'#22d3ee', bg:'rgba(34,211,238,.12)'  },
+  '複合':{ color:'#6366f1', bg:'rgba(99,102,241,.12)'  },
+  '水':  { color:'#0ea5e9', bg:'rgba(14,165,233,.12)'  },
+};
+
+// ランダム生成用パーツ
+const R_PREFIXES = ['カブ','ナス','テク','グロ','バリ','ゼロ','アル','マル','フュー','ネオ','ハイ','ドラ','レバ','ビッグ','スモ'];
+const R_SUFFIXES = ['モン','ゴン','リア','ウス','ドン','ガン','ラン','ビア','ロン','タス','ゼア','ナイト','ウルフ','ガード','ブレイク'];
+const R_EMOJIS   = ['🦁','🐯','🐉','🦊','🐺','🦅','🐳','🦋','🔱','💠','🌊','🌋','⚔️','🗡','🌟','💥','🔥','❄️','🌀','⚡'];
+const R_ATTRS    = ['雷','大地','炎','混沌','水','複合'];
+const R_TITLES   = [
+  '未知の可能性を秘めた者', '市場の片隅で息づく者', '成長を夢見る新参者',
+  '静かに力を蓄える者',   '次の時代を待つ者',     '埋もれた原石',
+  '波に乗ろうとする者',   '独自の道を行く者',     '挑戦者の魂',
+];
+const R_LORES = [
+  'まだ誰も気づいていないが、確かな力を秘めている。いつか世界を驚かせる日が来るかもしれない。',
+  '市場という大海を泳ぐ無名の存在。しかしその目には野心の炎が宿っている。',
+  '数字の裏に隠された物語。このモンスターの本当の価値は時間が証明するだろう。',
+  '知る人ぞ知る存在。大手には目もくれない玄人投資家が静かに仕込んでいる。',
+];
+
+function hashCode(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = (h * 16777619) >>> 0;
+  }
+  return h;
+}
+
+function generateUnknown(ticker) {
+  const h = hashCode(ticker);
+  const attrKey = R_ATTRS[h % R_ATTRS.length];
+  const attrData = ATTRS[attrKey];
+  const atk = 30 + (h >> 3) % 60;
+  const def = 20 + (h >> 7) % 60;
+  const spd = 25 + (h >> 11) % 65;
+  const luk = 30 + (h >> 15) % 60;
+  const rarityKeys = ['COMMON','COMMON','COMMON','UNCOMMON','UNCOMMON','RARE','EPIC'];
+  const rarity = rarityKeys[(h >> 19) % rarityKeys.length];
+  return {
+    name:   R_PREFIXES[h % R_PREFIXES.length] + R_SUFFIXES[(h >> 4) % R_SUFFIXES.length],
+    title:  R_TITLES[(h >> 8) % R_TITLES.length],
+    emoji:  R_EMOJIS[(h >> 12) % R_EMOJIS.length],
+    attr:   attrKey,
+    attrColor: attrData.color,
+    rarity,
+    lore:   R_LORES[(h >> 16) % R_LORES.length],
+    atk, def, spd, luk,
+  };
+}
+
+// ─────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────
+let currentMon = null;
+let party = [];
+try { party = JSON.parse(localStorage.getItem('kabumon_party') || '[]'); } catch(e) {}
+
+// ─────────────────────────────────────────────
+// helpers
+// ─────────────────────────────────────────────
+function show(id, visible) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = visible ? 'flex' : 'none';
+}
+
+// ─────────────────────────────────────────────
+// Generate（シンプル構成）
+// ─────────────────────────────────────────────
+function generate() {
+  const raw = document.getElementById('ticker-input').value.trim().toUpperCase();
+  if (!raw) return;
+
+  // Step1: ディスク表示
+  show('empty-state', false);
+  show('monster-card', false);
+  show('disc-wrap', true);
+  document.getElementById('disc-ticker').textContent = raw;
+
+  const msgs = [`${raw} からモンスターが目覚めている...`, '株券を解析中...', '魂を召喚しています...', 'もうすぐだ...'];
+  let mi = 0;
+  const msgEl = document.getElementById('loading-text');
+  const iv = setInterval(() => { msgEl.textContent = msgs[mi++ % msgs.length]; }, 400);
+
+  // Step2: 1.8秒後にモンスター爆誕
+  setTimeout(() => {
+    clearInterval(iv);
+
+    // データ取得
+    const base = LEGENDARY_STOCKS[raw];
+    const mon = base ? Object.assign({}, base) : generateUnknown(raw);
+    mon.ticker = raw;
+    currentMon = mon;
+
+    // フラッシュ
+    const flash = document.getElementById('flash');
+    flash.style.transition = 'opacity .06s';
+    flash.style.opacity = '1';
+    setTimeout(() => { flash.style.transition = 'opacity .4s'; flash.style.opacity = '0'; }, 60);
+
+    showSparkles(mon.attrColor || '#a78bfa');
+
+    // ディスク隠す → カード表示
+    show('disc-wrap', false);
+    renderMonsterCard(mon);
+    show('monster-card', true);
+
+    // emoji アニメ
+    const emojiEl = document.getElementById('mon-emoji');
+    emojiEl.style.animation = 'none';
+    void emojiEl.offsetWidth;
+    emojiEl.style.animation = 'mon-appear .6s cubic-bezier(.34,1.56,.64,1) forwards, mon-float 3s ease-in-out .6s infinite';
+
+  }, 1800);
+}
+
+function renderMonsterCard(mon) {
+  const rar  = RARITIES[mon.rarity] || RARITIES.COMMON;
+  const attr = ATTRS[mon.attr] || ATTRS['水'];
+
+  // rarity banner
+  const banner = document.getElementById('rarity-banner');
+  banner.textContent = rar.label;
+  banner.style.background = rar.color;
+  banner.style.color = '#fff';
+
+  // card body
+  const body = document.getElementById('card-body');
+  body.style.borderColor = rar.color;
+  body.style.background  = `radial-gradient(ellipse at 50% 0%, ${rar.bg} 0%, #0a0a1a 60%)`;
+  body.style.setProperty('--card-color', rar.color);
+  body.style.setProperty('--card-glow-color', rar.glow);
+
+  // emoji shadow
+  const emojiEl = document.getElementById('mon-emoji');
+  emojiEl.textContent = mon.emoji;
+  emojiEl.style.setProperty('--mon-shadow', `${mon.attrColor}88`);
+  emojiEl.style.filter = `drop-shadow(0 0 24px ${mon.attrColor}88) drop-shadow(0 0 48px ${mon.attrColor}44)`;
+
+  document.getElementById('mon-name').textContent  = mon.name;
+  document.getElementById('mon-title').textContent = mon.title;
+  document.getElementById('mon-lore').textContent  = mon.lore;
+
+  // attr badge
+  const attrEl = document.getElementById('mon-attr');
+  attrEl.textContent = mon.attr + '属性';
+  attrEl.style.background   = attr.bg;
+  attrEl.style.color        = attr.color;
+  attrEl.style.border       = `1px solid ${attr.color}55`;
+
+  // stats
+  document.getElementById('mon-stats').innerHTML = [
+    { label:'ATK 攻撃力', val:mon.atk, color:'#f59e0b' },
+    { label:'DEF 防御力', val:mon.def, color:'#22c55e' },
+    { label:'SPD 成長速度', val:mon.spd, color:'#a78bfa' },
+    { label:'LUCK 運', val:mon.luk, color:'#22d3ee' },
+  ].map(s => `
+    <div class="stat-item">
+      <div class="stat-item-label">${s.label}</div>
+      <div class="stat-item-bar">
+        <div class="stat-item-fill" style="width:${s.val}%;background:${s.color};transition:width .6s ease"></div>
+      </div>
+      <div class="stat-item-val" style="color:${s.color}">${s.val}</div>
+    </div>
+  `).join('');
+
+  // add-party btn
+  const inParty = party.some(p => p.ticker === mon.ticker);
+  const btn = document.getElementById('add-party-btn');
+  btn.textContent = inParty ? '✓ パーティにいる' : '＋ パーティに加える';
+  btn.disabled = inParty;
+  btn.style.opacity = inParty ? '.5' : '1';
+}
+
+function addToParty() {
+  if (!currentMon) return;
+  if (party.some(p => p.ticker === currentMon.ticker)) return;
+  if (party.length >= 6) { alert('パーティは6体まで！'); return; }
+  party.push(currentMon);
+  saveParty();
+  renderParty();
+  document.getElementById('add-party-btn').textContent = '✓ パーティにいる';
+  document.getElementById('add-party-btn').disabled = true;
+  document.getElementById('add-party-btn').style.opacity = '.5';
+}
+
+function clearParty() {
+  party = []; saveParty(); renderParty();
+}
+
+function saveParty() {
+  localStorage.setItem('kabumon_party', JSON.stringify(party));
+  document.getElementById('party-count').textContent = party.length;
+}
+
+function renderParty() {
+  document.getElementById('party-count').textContent = party.length;
+  const grid = document.getElementById('party-grid');
+  if (party.length === 0) {
+    grid.innerHTML = '<div class="party-empty">まだモンスターがいない。ティッカーを入れて召喚せよ。</div>';
+    return;
+  }
+  grid.innerHTML = party.map((m, i) => {
+    const rar = RARITIES[m.rarity] || RARITIES.COMMON;
+    return `
+      <div class="party-mon" onclick="selectPartyMon(${i})"
+        style="border-color:${rar.color}44;box-shadow:0 0 12px ${rar.glow||'transparent'}">
+        <span class="party-mon-rarity">${m.rarity[0]}</span>
+        <span class="party-mon-emoji">${m.emoji}</span>
+        <div class="party-mon-name">${m.name}</div>
+        <div class="party-mon-ticker">${m.ticker}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectPartyMon(i) {
+  currentMon = party[i];
+  document.getElementById('ticker-input').value = party[i].ticker;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('disc-wrap').style.display = 'none';
+  renderMonsterCard(currentMon);
+  document.getElementById('monster-card').style.display = 'flex';
+  window.scrollTo({ top: 300, behavior: 'smooth' });
+}
+
+function showSparkles(color) {
+  const container = document.getElementById('sparkles');
+  const icons = ['✨','⭐','💫','🌟','⚡','💥'];
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  for (let i = 0; i < 20; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = icons[Math.floor(Math.random() * icons.length)];
+    const angle = (Math.PI * 2 * i) / 20 + Math.random() * .5;
+    const dist  = 80 + Math.random() * 160;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    s.style.left = cx + 'px';
+    s.style.top  = cy + 'px';
+    s.style.setProperty('--dx', dx + 'px');
+    s.style.setProperty('--dy', dy + 'px');
+    s.style.animationDelay = (Math.random() * .3) + 's';
+    s.style.fontSize = (16 + Math.random() * 16) + 'px';
+    container.appendChild(s);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 1200);
+}
+
+function shareX() {
+  if (!currentMon) return;
+  const mon = currentMon;
+  const rar = RARITIES[mon.rarity]?.label || 'COMMON';
+  const text = `${mon.emoji} 【株モン召喚】\n\n「${mon.ticker}」から「${mon.name}」が生まれた！\n${mon.attr}属性 / ${mon.rarity}\n\n${mon.title}\n\nATK:${mon.atk} DEF:${mon.def} SPD:${mon.spd} LUK:${mon.luk}\n\n#株モン #投資 #FIRE\nby Playgic Tools`;
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
+}
+
+// 初期化
+renderParty();
+</script>
+</body>
+</html>

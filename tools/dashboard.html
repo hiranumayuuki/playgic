@@ -18,6 +18,7 @@
     --yellow:   #f59e0b;
     --red:      #ef4444;
     --blue:     #3b82f6;
+    --cyan:     #00D4FF;
     --text:     #e2e8f0;
     --dim:      #64748b;
   }
@@ -30,7 +31,6 @@
     padding: 24px;
   }
 
-  /* ── ヘッダー ── */
   .header {
     display: flex;
     align-items: center;
@@ -51,7 +51,6 @@
     font-weight: 600;
   }
 
-  /* ── グリッド ── */
   .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 14px; }
   .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 14px; }
   .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; margin-bottom: 14px; }
@@ -59,7 +58,6 @@
     .grid-4,.grid-3,.grid-2 { grid-template-columns: 1fr 1fr; }
   }
 
-  /* ── カード共通 ── */
   .card {
     background: var(--bg2);
     border: 1px solid var(--border);
@@ -76,149 +74,128 @@
     background: var(--accent, transparent);
     border-radius: 14px 14px 0 0;
   }
-  .card-label {
-    font-size: 11px;
-    color: var(--dim);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    font-weight: 600;
-  }
-  .card-value {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--text);
-    line-height: 1.1;
-  }
-  .card-sub {
-    font-size: 12px;
-    color: var(--dim);
-    margin-top: 4px;
-  }
-  .card-icon {
-    position: absolute;
-    top: 16px; right: 16px;
-    font-size: 22px;
-    opacity: .3;
-  }
+  .card-label { font-size: 11px; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+  .card-value { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1.1; }
+  .card-sub { font-size: 12px; color: var(--dim); margin-top: 4px; }
+  .card-icon { position: absolute; top: 16px; right: 16px; font-size: 22px; opacity: .3; }
 
-  /* ── KPIカード ── */
   .kpi { --accent: linear-gradient(90deg, var(--purple), var(--blue)); }
-  .kpi-green { --accent: var(--green); }
-  .kpi-yellow { --accent: var(--yellow); }
 
-  /* ── プロジェクトカード ── */
   .project-card { --accent: var(--purple-l); }
-  .project-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
+  .project-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .project-icon { font-size: 20px; }
   .project-name { font-size: 15px; font-weight: 700; }
-  .status-badge {
-    margin-left: auto;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 999px;
-  }
-  .status-done    { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
-  .status-active  { background: rgba(124,58,237,.15); color: var(--purple-l); border: 1px solid rgba(124,58,237,.3); }
-  .status-waiting { background: rgba(245,158,11,.12); color: var(--yellow); border: 1px solid rgba(245,158,11,.3); }
-  .status-paused  { background: rgba(100,116,139,.12); color: var(--dim); border: 1px solid rgba(100,116,139,.2); }
+  .status-badge { margin-left: auto; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+  .status-done    { background: rgba(16,185,129,.15);  color: var(--green);    border: 1px solid rgba(16,185,129,.3); }
+  .status-active  { background: rgba(124,58,237,.15);  color: var(--purple-l); border: 1px solid rgba(124,58,237,.3); }
+  .status-waiting { background: rgba(245,158,11,.12);  color: var(--yellow);   border: 1px solid rgba(245,158,11,.3); }
+  .status-paused  { background: rgba(100,116,139,.12); color: var(--dim);      border: 1px solid rgba(100,116,139,.2); }
 
-  /* プログレスバー */
   .progress-wrap { margin: 10px 0 4px; }
   .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); margin-bottom: 5px; }
   .progress-bar { height: 5px; background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; }
   .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--purple), var(--purple-l)); transition: width .6s ease; }
 
-  /* チェックリスト */
   .checklist { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-  .checklist li { font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--dim); }
+  .checklist li { font-size: 13px; display: flex; align-items: flex-start; gap: 8px; color: var(--dim); }
   .checklist li.done { color: var(--text); }
-  .checklist li::before { content: '○'; font-size: 11px; flex-shrink: 0; color: var(--dim); }
+  .checklist li::before { content: '○'; font-size: 11px; flex-shrink: 0; color: var(--dim); margin-top: 1px; }
   .checklist li.done::before { content: '✓'; color: var(--green); }
 
-  /* ── チームカード ── */
-  .team-card {
+  /* ── アクションリスト ── */
+  .action-card {
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 18px 20px;
+    --accent: var(--cyan);
   }
-  .team-member {
+  .action-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--purple), var(--cyan));
+    border-radius: 14px 14px 0 0;
+    position: relative;
+    display: block;
+    margin: -18px -20px 16px;
+    border-radius: 14px 14px 0 0;
+  }
+  .action-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .action-item {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .team-member:last-child { border-bottom: none; }
-  .avatar {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .av-hikaru  { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.3); }
-  .av-kuro    { background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.3); }
-  .av-angie   { background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3); }
-  .av-gemini  { background: rgba(34,211,238,.12); border: 1px solid rgba(34,211,238,.3); }
-  .av-gpt     { background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.3); }
-  .member-name { font-size: 14px; font-weight: 700; }
-  .member-role { font-size: 12px; color: var(--dim); }
-  .member-status {
-    margin-left: auto;
-    font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-weight: 600;
-  }
-  .online  { background: rgba(16,185,129,.12); color: var(--green);  border: 1px solid rgba(16,185,129,.3); }
-  .offline { background: rgba(100,116,139,.1);  color: var(--dim);    border: 1px solid rgba(100,116,139,.2); }
-  .waiting { background: rgba(245,158,11,.12); color: var(--yellow); border: 1px solid rgba(245,158,11,.3); }
-
-  /* ── 投資カード ── */
-  .invest-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid var(--border);
     font-size: 13px;
   }
-  .invest-row:last-child { border-bottom: none; }
-  .invest-label { color: var(--dim); }
-  .invest-val { font-weight: 700; }
-  .up   { color: var(--green); }
-  .flat { color: var(--yellow); }
-  .down { color: var(--red); }
-
-  /* ── セクションタイトル ── */
-  .section-title {
-    font-size: 12px;
+  .action-item.urgent { border-color: rgba(239,68,68,.3); background: rgba(239,68,68,.05); }
+  .action-item.high   { border-color: rgba(245,158,11,.3); background: rgba(245,158,11,.04); }
+  .action-item.normal { border-color: var(--border); }
+  .action-tag {
+    font-size: 10px;
     font-weight: 700;
-    color: var(--dim);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    margin: 20px 0 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    letter-spacing: .05em;
   }
+  .tag-urgent { background: rgba(239,68,68,.2);   color: var(--red);    border: 1px solid rgba(239,68,68,.3); }
+  .tag-high   { background: rgba(245,158,11,.15); color: var(--yellow); border: 1px solid rgba(245,158,11,.3); }
+  .tag-normal { background: rgba(124,58,237,.12); color: var(--purple-l); border: 1px solid rgba(124,58,237,.3); }
+  .action-deadline { margin-left: auto; font-size: 11px; color: var(--dim); flex-shrink: 0; }
 
-  /* ── ロードマップ ── */
+  /* ── eBay実験カード ── */
+  .ebay-experiment {
+    background: linear-gradient(135deg, rgba(0,212,255,.05), rgba(124,58,237,.08));
+    border: 1px solid rgba(0,212,255,.2);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .exp-title { font-size: 13px; font-weight: 700; color: var(--cyan); margin-bottom: 12px; letter-spacing: .05em; }
+  .exp-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.04); font-size: 13px; }
+  .exp-row:last-child { border-bottom: none; }
+  .exp-label { color: var(--dim); }
+  .exp-val { font-weight: 700; }
+  .exp-progress {
+    margin-top: 14px;
+    height: 6px;
+    background: rgba(255,255,255,.06);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .exp-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #00D4FF, #7B2FBE);
+    width: 3%;
+  }
+  .exp-days { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); margin-top: 4px; }
+
+  /* チーム */
+  .team-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .team-member { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .team-member:last-child { border-bottom: none; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .av-hikaru { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.3); }
+  .av-kuro   { background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.3); }
+  .av-angie  { background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3); }
+  .member-name { font-size: 14px; font-weight: 700; }
+  .member-role { font-size: 12px; color: var(--dim); }
+  .member-status { margin-left: auto; font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 600; flex-shrink: 0; }
+  .online  { background: rgba(16,185,129,.12); color: var(--green);  border: 1px solid rgba(16,185,129,.3); }
+  .waiting { background: rgba(245,158,11,.12); color: var(--yellow); border: 1px solid rgba(245,158,11,.3); }
+
+  /* ロードマップ */
   .timeline { display: flex; flex-direction: column; gap: 0; }
-  .tl-item { display: flex; gap: 14px; padding-bottom: 18px; position: relative; }
+  .tl-item { display: flex; gap: 14px; padding-bottom: 18px; }
   .tl-item:last-child { padding-bottom: 0; }
   .tl-left { display: flex; flex-direction: column; align-items: center; }
-  .tl-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: 4px;
-  }
+  .tl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
   .tl-dot.done   { background: var(--green); }
   .tl-dot.active { background: var(--purple-l); box-shadow: 0 0 8px var(--purple); }
   .tl-dot.future { background: rgba(255,255,255,.15); }
@@ -227,11 +204,19 @@
   .tl-year { font-size: 12px; font-weight: 800; color: var(--purple-l); }
   .tl-text { font-size: 13px; color: var(--text); margin-top: 1px; }
   .tl-sub  { font-size: 11px; color: var(--dim); margin-top: 2px; }
+
+  .section-title { font-size: 12px; font-weight: 700; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; margin: 20px 0 10px; }
+
+  .invest-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .invest-row:last-child { border-bottom: none; }
+  .invest-label { color: var(--dim); }
+  .invest-val { font-weight: 700; }
+  .up   { color: var(--green); }
+  .flat { color: var(--yellow); }
 </style>
 </head>
 <body>
 
-<!-- ヘッダー -->
 <div class="header">
   <div class="header-left">
     <div class="logo">PLAY<span>GIC</span></div>
@@ -239,7 +224,7 @@
   </div>
   <div style="display:flex;align-items:center;gap:16px;">
     <div class="date" id="date-display"></div>
-    <a href="index.html" style="font-size:12px;color:var(--dim);text-decoration:none;border:1px solid rgba(255,255,255,.1);padding:4px 12px;border-radius:999px;transition:all .2s;" onmouseover="this.style.color='#a78bfa';this.style.borderColor='rgba(124,58,237,.4)'" onmouseout="this.style.color='var(--dim)';this.style.borderColor='rgba(255,255,255,.1)'">← Tools Hub</a>
+    <a href="index.html" style="font-size:12px;color:var(--dim);text-decoration:none;border:1px solid rgba(255,255,255,.1);padding:4px 12px;border-radius:999px;">← Tools Hub</a>
   </div>
 </div>
 
@@ -248,35 +233,72 @@
 <div class="grid-4">
   <div class="card kpi">
     <div class="card-icon">💰</div>
-    <div class="card-label">総資産</div>
+    <div class="card-label">総資産（概算）</div>
     <div class="card-value">1,931<span style="font-size:16px;color:var(--dim)">万円</span></div>
     <div class="card-sub">目標：1億円（2031年）</div>
   </div>
   <div class="card kpi">
     <div class="card-icon">🎬</div>
     <div class="card-label">YouTube 登録者</div>
-    <div class="card-value">1<span style="font-size:16px;color:var(--dim)">人</span></div>
-    <div class="card-sub">1本目 今夜公開 🔥</div>
+    <div class="card-value">—</div>
+    <div class="card-sub">1本目 公開済み 🔥 2本目スクリプト完成</div>
   </div>
   <div class="card kpi">
     <div class="card-icon">📦</div>
-    <div class="card-label">eBay 今月利益</div>
-    <div class="card-value">—</div>
-    <div class="card-sub">実運用待ち</div>
+    <div class="card-label">eBay 出品中</div>
+    <div class="card-value">1<span style="font-size:16px;color:var(--dim)">点</span></div>
+    <div class="card-sub">FF3 FC CIB — $85 出品中</div>
   </div>
   <div class="card kpi">
     <div class="card-icon">📊</div>
     <div class="card-label">証券担保ローン</div>
     <div class="card-value">50<span style="font-size:16px;color:var(--dim)">万円</span></div>
-    <div class="card-sub">金利 2.15% / RSI待ち</div>
+    <div class="card-sub">金利 2.15% / RSI待ち（期限 6/22）</div>
   </div>
+</div>
+
+<!-- 今すぐやること -->
+<div class="section-title">今すぐやること</div>
+<div class="card" style="margin-bottom:14px;position:relative;">
+  <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ef4444,#f59e0b,#7c3aed);border-radius:14px 14px 0 0;"></div>
+  <ul class="action-list" style="margin-top:4px;">
+    <li class="action-item urgent">
+      <span class="action-tag tag-urgent">今すぐ</span>
+      noteのbioタイポ修正「頭張らない」→「頑張らない」
+    </li>
+    <li class="action-item high">
+      <span class="action-tag tag-high">今週</span>
+      YouTube 2本目 録音・編集・公開（スクリプト完成済み）
+    </li>
+    <li class="action-item high">
+      <span class="action-tag tag-high">投資</span>
+      QQQ/SMH のRSI監視 → RSI55以下で¥250,000投入
+      <span class="action-deadline">期限 6/22</span>
+    </li>
+    <li class="action-item normal">
+      <span class="action-tag tag-normal">eBay</span>
+      FF3 ビュー数・ウォッチ数・オファー状況を週次確認
+      <span class="action-deadline">毎週</span>
+    </li>
+    <li class="action-item normal">
+      <span class="action-tag tag-normal">投資</span>
+      JPM 信用買い1株（$304.19）返済判断
+    </li>
+    <li class="action-item normal">
+      <span class="action-tag tag-normal">投資</span>
+      SPYD・VYM・インド株 売却 → NASDAQ100移行
+    </li>
+    <li class="action-item normal">
+      <span class="action-tag tag-normal">HP</span>
+      GitHub Pages で公開（YouTubeと同時が理想）
+    </li>
+  </ul>
 </div>
 
 <!-- プロジェクト -->
 <div class="section-title">プロジェクト進捗</div>
 <div class="grid-2">
 
-  <!-- YouTube -->
   <div class="card project-card">
     <div class="project-header">
       <div class="project-icon">🎬</div>
@@ -284,43 +306,41 @@
       <div class="status-badge status-active">稼働中</div>
     </div>
     <div class="progress-wrap">
-      <div class="progress-label"><span>進捗</span><span>70%</span></div>
-      <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
+      <div class="progress-label"><span>進捗</span><span>80%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
     </div>
     <ul class="checklist" style="margin-top:12px;">
-      <li class="done">チャンネル設定完了（Rebel Sheep / @rebelsheepjp）</li>
+      <li class="done">チャンネル設定完了（@rebelsheepjp）</li>
       <li class="done">バナー・説明文・アイコン設定済み</li>
-      <li class="done">1本目スクリプト・録音・編集完了</li>
-      <li class="done">今夜公開予約済み 🔥</li>
-      <li>2〜5本目の企画立案</li>
-      <li>X（Twitter）アカウント開設</li>
+      <li class="done">1本目 公開済み（証券担保ローン50万円）</li>
+      <li class="done">X（@numachi_fire）整備完了</li>
+      <li class="done">note記事 #001 公開済み</li>
+      <li class="done">2本目スクリプト完成（AIをCEOにした話）</li>
+      <li>2本目 録音・編集・公開</li>
       <li>登録者1,000人 → 収益化</li>
     </ul>
   </div>
 
-  <!-- eBay Agent -->
   <div class="card project-card">
     <div class="project-header">
       <div class="project-icon">🤖</div>
       <div class="project-name">eBay Sourcing Agent</div>
-      <div class="status-badge status-waiting">実運用待ち</div>
+      <div class="status-badge status-active">実験中</div>
     </div>
     <div class="progress-wrap">
-      <div class="progress-label"><span>開発進捗</span><span>90%</span></div>
-      <div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div>
+      <div class="progress-label"><span>進捗</span><span>95%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:95%"></div></div>
     </div>
     <ul class="checklist" style="margin-top:12px;">
-      <li class="done">scraper.py（ヤフオク・eBayスクレイプ）</li>
-      <li class="done">analyzer.py（Gemini AI査定）</li>
-      <li class="done">crawler.py（自動バッチ巡回）</li>
-      <li class="done">notifier.py（Gmail通知）テスト成功</li>
-      <li class="done">status.py（進捗確認）</li>
-      <li>実際のキーワード巡回を実行する</li>
-      <li>google.genai 移行（アンジー復帰後）</li>
+      <li class="done">scraper / analyzer / crawler / notifier 完成</li>
+      <li class="done">Gmail通知テスト成功</li>
+      <li class="done">FF3 FC CIB ¥2,755 仕入れ・出品完了</li>
+      <li>FF3 売上確認（週次）</li>
+      <li>追加仕入れ（レンズ・カメラ・ゲーム）</li>
+      <li>30日実験 評価レポート（6/30）</li>
     </ul>
   </div>
 
-  <!-- 投資 -->
   <div class="card project-card">
     <div class="project-header">
       <div class="project-icon">📊</div>
@@ -332,142 +352,116 @@
       <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
     </div>
     <ul class="checklist" style="margin-top:12px;">
-      <li class="done">証券担保ローン50万円 調達済み</li>
+      <li class="done">証券担保ローン¥500,000 調達済み</li>
       <li class="done">投資戦略確定（RSI55以下でトリガー）</li>
-      <li>RSI監視 → QQQ/SMH ¥250,000投入</li>
-      <li>JPM信用買い 返済</li>
+      <li>RSI監視 → QQQ/SMH ¥250,000投入（6/22期限）</li>
+      <li>下落時 残り¥250,000 追加投入</li>
+      <li>JPM信用買い 返済判断</li>
       <li>HYG→QQQI 乗り換え検討</li>
-      <li>SPYD・VYM・インド株 売却→NASDAQ100</li>
+      <li>SPYD・VYM・インド株 → NASDAQ100移行</li>
     </ul>
   </div>
 
-  <!-- ツール & インフラ -->
   <div class="card project-card">
     <div class="project-header">
-      <div class="project-icon">💻</div>
-      <div class="project-name">ツール & インフラ</div>
-      <div class="status-badge status-waiting">公開待ち</div>
+      <div class="project-icon">🎨</div>
+      <div class="project-name">マーケティング / ブランディング</div>
+      <div class="status-badge status-active">稼働中</div>
     </div>
     <div class="progress-wrap">
-      <div class="progress-label"><span>進捗</span><span>75%</span></div>
-      <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+      <div class="progress-label"><span>進捗</span><span>70%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
     </div>
     <ul class="checklist" style="margin-top:12px;">
-      <li class="done">loan.html（証券担保ローンシミュ）</li>
-      <li class="done">fire.html（FIREシミュレーター）</li>
-      <li class="done">portfolio.html（金融工学的分析）</li>
-      <li class="done">dashboard.html（このページ）</li>
-      <li class="done">ファイル自動整理 稼働中</li>
-      <li>GitHub Pages 公開</li>
+      <li class="done">ブランドガイドライン策定</li>
+      <li class="done">マスコット「クロ」確定・50ポーズ作成</li>
+      <li class="done">世界観確定（黒猫クロ × Rebel Sheep）</li>
+      <li class="done">note #001 公開済み</li>
+      <li>クロをサムネに登場させる（2本目〜）</li>
+      <li>note #002・#003 作成</li>
+      <li>GitHub Pages HP公開</li>
     </ul>
   </div>
 
 </div>
 
-<!-- チーム & ロードマップ -->
+<!-- eBay実験 + チーム -->
 <div class="grid-2">
 
-  <!-- チーム -->
+  <div class="ebay-experiment">
+    <div class="exp-title">▶ eBay 30日実験（2026-05-31 〜 06-30）</div>
+    <div class="exp-row"><span class="exp-label">仕入れ品</span><span class="exp-val">FF3 ファミコン CIB</span></div>
+    <div class="exp-row"><span class="exp-label">仕入れ値</span><span class="exp-val">¥2,755</span></div>
+    <div class="exp-row"><span class="exp-label">出品価格</span><span class="exp-val">$85 / Best Offer（最低$65）</span></div>
+    <div class="exp-row"><span class="exp-label">送料</span><span class="exp-val">$20（購入者負担）</span></div>
+    <div class="exp-row"><span class="exp-label">想定粗利</span><span class="exp-val up">¥5,000〜¥8,000</span></div>
+    <div class="exp-row"><span class="exp-label">評価期限</span><span class="exp-val flat">2026-06-30</span></div>
+    <div class="exp-progress"></div>
+    <div class="exp-days"><span>Day 1</span><span>← 今ここ</span><span>Day 30</span></div>
+  </div>
+
   <div class="team-card">
     <div class="section-title" style="margin-top:0">エージェントチーム</div>
-    <div class="timeline" style="display:block">
-
-      <div class="team-member">
-        <div class="avatar av-hikaru">👑</div>
-        <div>
-          <div class="member-name">ヒカル</div>
-          <div class="member-role">ファウンダー — 意思決定・ビジョン</div>
-        </div>
-        <div class="member-status online">稼働中</div>
+    <div class="team-member">
+      <div class="avatar av-hikaru">👑</div>
+      <div>
+        <div class="member-name">ヒカル</div>
+        <div class="member-role">Founder — 意思決定・最終判断</div>
       </div>
-
-      <div class="team-member">
-        <div class="avatar av-kuro">⚫</div>
-        <div>
-          <div class="member-name">クロ（Claude / Anthropic）</div>
-          <div class="member-role">CEO — 設計・戦略・コード・文章</div>
-        </div>
-        <div class="member-status online">稼働中</div>
+      <div class="member-status online">稼働中</div>
+    </div>
+    <div class="team-member">
+      <div class="avatar av-kuro">🐱</div>
+      <div>
+        <div class="member-name">クロ（Claude / Anthropic）</div>
+        <div class="member-role">CEO — 設計・戦略・コード・文章</div>
       </div>
-
-      <div class="team-member">
-        <div class="avatar av-angie">✨</div>
-        <div>
-          <div class="member-name">アンジー（Antigravity / Google）</div>
-          <div class="member-role">実行・AI画像査定 — 6/6 復帰予定</div>
-        </div>
-        <div class="member-status waiting">6/6 復帰</div>
+      <div class="member-status online">稼働中</div>
+    </div>
+    <div class="team-member">
+      <div class="avatar av-angie">✨</div>
+      <div>
+        <div class="member-name">アンジー（Gemini）</div>
+        <div class="member-role">実行・AI画像査定</div>
       </div>
-
-      <div class="team-member">
-        <div class="avatar av-gemini">🔵</div>
-        <div>
-          <div class="member-name">Gemini（Google DeepMind）</div>
-          <div class="member-role">外部顧問 — 戦略の穴を突く・別視点</div>
-        </div>
-        <div class="member-status online">稼働中</div>
-      </div>
-
-      <div class="team-member">
-        <div class="avatar av-gpt">🟢</div>
-        <div>
-          <div class="member-name">GPT（OpenAI）</div>
-          <div class="member-role">外部顧問 — ブレスト・アイデア量産</div>
-        </div>
-        <div class="member-status offline">無料プラン</div>
-      </div>
-
+      <div class="member-status waiting">待機中</div>
     </div>
   </div>
 
-  <!-- ロードマップ -->
-  <div class="team-card">
-    <div class="section-title" style="margin-top:0">ロードマップ</div>
-    <div class="timeline">
+</div>
 
-      <div class="tl-item">
-        <div class="tl-left">
-          <div class="tl-dot active"></div>
-          <div class="tl-line"></div>
-        </div>
-        <div>
-          <div class="tl-year">2026 ← 今ここ</div>
-          <div class="tl-text">種まきフェーズ</div>
-          <div class="tl-sub">YouTube始動・eBayエージェント・投資ループ構築</div>
-        </div>
+<!-- ロードマップ -->
+<div class="section-title">ロードマップ</div>
+<div class="team-card">
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot active"></div><div class="tl-line"></div></div>
+      <div>
+        <div class="tl-year">2026 ← 今ここ</div>
+        <div class="tl-text">種まきフェーズ</div>
+        <div class="tl-sub">YouTube始動・eBay30日実験・証券担保ローン運用・X/note展開</div>
       </div>
-
-      <div class="tl-item">
-        <div class="tl-left">
-          <div class="tl-dot future"></div>
-          <div class="tl-line"></div>
-        </div>
-        <div>
-          <div class="tl-year">2027〜2028</div>
-          <div class="tl-text">加速フェーズ / サイドFIRE</div>
-          <div class="tl-sub">資産3,000万・YouTube収益化・eBay自動化完成</div>
-        </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot future"></div><div class="tl-line"></div></div>
+      <div>
+        <div class="tl-year">2027〜2028</div>
+        <div class="tl-text">加速フェーズ / サイドFIRE</div>
+        <div class="tl-sub">資産3,000万・YouTube収益化・eBay自動化完成・本業縮小</div>
       </div>
-
-      <div class="tl-item">
-        <div class="tl-left">
-          <div class="tl-dot future"></div>
-          <div class="tl-line"></div>
-        </div>
-        <div>
-          <div class="tl-year">2029〜2031</div>
-          <div class="tl-text">拡張フェーズ / 完全FIRE</div>
-          <div class="tl-sub">資産1億達成・時間と場所の完全自由</div>
-        </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot future"></div><div class="tl-line"></div></div>
+      <div>
+        <div class="tl-year">2029〜2031</div>
+        <div class="tl-text">拡張フェーズ / 完全FIRE</div>
+        <div class="tl-sub">資産1億達成・時間と場所の完全自由</div>
       </div>
-
     </div>
   </div>
-
 </div>
 
 <script>
-  // 日付表示
   const d = new Date();
   document.getElementById('date-display').textContent =
     d.getFullYear() + '/' +

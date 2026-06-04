@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投資レポート — Playgic</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #07070f; --bg2: #0e0e1a; --border: rgba(255,255,255,.07);
+    --purple: #7c3aed; --purple-l: #a78bfa; --green: #10b981;
+    --yellow: #f59e0b; --red: #ef4444; --cyan: #00D4FF;
+    --text: #e2e8f0; --dim: #64748b;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Helvetica Neue','Hiragino Sans','Yu Gothic',sans-serif; min-height: 100vh; padding: 24px; }
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .logo { font-size: 22px; font-weight: 800; letter-spacing: .06em; }
+  .logo span { color: var(--purple-l); }
+  a.back { font-size: 12px; color: var(--dim); text-decoration: none; border: 1px solid rgba(255,255,255,.1); padding: 4px 12px; border-radius: 999px; }
+  .report-box {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px 32px; max-width: 780px; margin: 0 auto;
+    border-top: 2px solid var(--purple-l);
+  }
+  .report-box h1 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .report-box h2 { font-size: 15px; font-weight: 700; margin: 20px 0 10px; color: var(--purple-l); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .report-box p, .report-box li { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .report-box ul { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+  .report-box em { color: var(--dim); font-style: normal; font-size: 12px; }
+  .report-box hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .report-box table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+  .report-box td, .report-box th { padding: 8px 12px; border: 1px solid var(--border); }
+  .report-box th { background: rgba(124,58,237,.1); color: var(--purple-l); }
+  .score-badge {
+    display: inline-block; padding: 4px 14px; border-radius: 999px; font-size: 13px; font-weight: 700;
+    margin-left: 10px;
+  }
+  .score-high   { background: rgba(16,185,129,.15);  color: var(--green);    border: 1px solid rgba(16,185,129,.3); }
+  .score-mid    { background: rgba(245,158,11,.12);  color: var(--yellow);   border: 1px solid rgba(245,158,11,.3); }
+  .score-low    { background: rgba(239,68,68,.12);   color: var(--red);      border: 1px solid rgba(239,68,68,.3); }
+  .refresh-btn {
+    background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.4);
+    color: var(--purple-l); padding: 8px 20px; border-radius: 8px; font-size: 13px;
+    cursor: pointer; font-weight: 600;
+  }
+  .refresh-btn:hover { background: rgba(124,58,237,.3); }
+  .no-report { text-align: center; padding: 60px 20px; color: var(--dim); }
+  .no-report .icon { font-size: 48px; margin-bottom: 16px; }
+  strong { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">PLAY<span>GIC</span> — 投資レポート</div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <button class="refresh-btn" onclick="loadReport()">🔄 更新</button>
+    <a href="dashboard.html" class="back">← Dashboard</a>
+  </div>
+</div>
+
+<div class="report-box" id="report-container">
+  <div class="no-report">
+    <div class="icon">📊</div>
+    <p>レポートを読み込み中...</p>
+  </div>
+</div>
+
+<script>
+async function loadReport() {
+  const container = document.getElementById('report-container');
+  try {
+    const res = await fetch('/investment/morning_report/latest_report.md?t=' + Date.now());
+    if (!res.ok) throw new Error('not found');
+    const text = await res.text();
+    container.innerHTML = markdownToHtml(text);
+  } catch(e) {
+    container.innerHTML = `
+      <div class="no-report">
+        <div class="icon">😴</div>
+        <p style="margin-bottom:8px;">レポートがまだ生成されていません</p>
+        <p style="font-size:12px;color:var(--dim)">毎朝6:00に自動生成されます</p>
+      </div>`;
+  }
+}
+
+function markdownToHtml(md) {
+  const lines = md.split('\n');
+  let html = '';
+  for (const line of lines) {
+    if (line.startsWith('# '))       html += `<h1>${esc(line.slice(2))}</h1>`;
+    else if (line.startsWith('## ')) html += `<h2>${esc(line.slice(3))}</h2>`;
+    else if (line.startsWith('- '))  html += `<ul><li>${renderInline(line.slice(2))}</li></ul>`;
+    else if (line.startsWith('| '))  html += renderTableRow(line);
+    else if (line.startsWith('*') && line.endsWith('*')) html += `<em>${esc(line.slice(1,-1))}</em><br>`;
+    else if (line === '---')          html += '<hr>';
+    else if (line.trim() === '')      html += '<br>';
+    else html += `<p>${renderInline(line)}</p>`;
+  }
+  // ul の連続をまとめる
+  html = html.replace(/<\/ul><ul>/g, '');
+  return html;
+}
+
+function renderInline(text) {
+  return esc(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.+?)`/g, '<code>$1</code>');
+}
+
+function renderTableRow(line) {
+  if (line.includes('---')) return '';
+  const cells = line.split('|').filter(c => c.trim());
+  return '<table><tr>' + cells.map(c => `<td>${renderInline(c.trim())}</td>`).join('') + '</tr></table>';
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+loadReport();
+</script>
+</body>
+</html>

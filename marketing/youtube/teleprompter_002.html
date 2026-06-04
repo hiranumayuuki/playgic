@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台本 #002 — Rebel Sheep</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Helvetica Neue', 'Hiragino Sans', sans-serif;
+    padding: 40px 32px;
+    line-height: 1.9;
+  }
+
+  .controls {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(0,0,0,.9);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+    border-bottom: 1px solid #222;
+  }
+  .ctrl-btn {
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .ctrl-btn:active { background: #444; }
+  .size-label { color: #888; font-size: 14px; }
+
+  .content {
+    margin-top: 70px;
+    max-width: 820px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .section {
+    margin-bottom: 48px;
+    padding: 28px 32px;
+    border-radius: 16px;
+    background: #0d0d0d;
+    border-left: 4px solid #444;
+  }
+  .section.hook    { border-left-color: #a78bfa; }
+  .section.kyokan  { border-left-color: #06b6d4; }
+  .section.tenkan  { border-left-color: #22c55e; }
+  .section.shikumi { border-left-color: #f59e0b; }
+  .section.change  { border-left-color: #ef4444; }
+  .section.honest  { border-left-color: #64748b; }
+  .section.cta     { border-left-color: #a78bfa; }
+
+  .section-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: .5;
+  }
+
+  .line {
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: #f0f0f0;
+  }
+
+  .line.big {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  .line.accent {
+    color: #a78bfa;
+    font-weight: 800;
+  }
+
+  .line.cyan { color: #06b6d4; font-weight: 700; }
+  .line.green { color: #22c55e; font-weight: 700; }
+  .line.yellow { color: #f59e0b; font-weight: 700; }
+  .line.red { color: #ef4444; font-weight: 700; }
+
+  .num {
+    font-size: 40px;
+    font-weight: 900;
+    color: #06b6d4;
+    margin-bottom: 8px;
+  }
+
+  .pause {
+    display: inline-block;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 2px 12px;
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button class="ctrl-btn" onclick="changeSize(-2)">A−</button>
+  <button class="ctrl-btn" onclick="changeSize(2)">A＋</button>
+  <span class="size-label">文字サイズ調整</span>
+  <button class="ctrl-btn" onclick="toggleDim()">🌙 暗くする</button>
+</div>
+
+<div class="content" id="content">
+
+  <!-- HOOK -->
+  <div class="section hook">
+    <div class="section-label">🎣 HOOK / 0:00〜0:20</div>
+    <div class="num">¥43,092</div>
+    <div class="line big">今日、証券担保ローンで<br>借りた50万円を動かした。</div>
+    <div class="line cyan">NASDAQ-100を90口</div>
+    <div class="line cyan">半導体ETFを4口</div>
+    <div class="pause">間</div>
+    <div class="line accent">これを、AIに判断させた。</div>
+  </div>
+
+  <!-- 共感 -->
+  <div class="section kyokan">
+    <div class="section-label">💬 共感 / 0:20〜1:20</div>
+    <div class="line">去年から3つ同時に動かそうとしてた。</div>
+    <div class="line cyan">投資・eBay輸出・YouTube</div>
+    <div class="line big">全部、中途半端だった。</div>
+    <div class="line">投資は「なんとなく上がりそう」で</div>
+    <div class="line accent">だいたい高値掴みをした。</div>
+    <div class="pause">間・苦笑い</div>
+    <div class="line">eBayは3時間調べて</div>
+    <div class="line accent">疲れてそのまま寝た。</div>
+    <div class="line">YouTubeは完璧なスクリプトができてから…</div>
+    <div class="line accent">3週間、何もしなかった。</div>
+    <div class="pause">間</div>
+    <div class="line">やる気の問題？　時間の問題？</div>
+    <div class="line big">違った。</div>
+    <div class="line accent">「全部、自分でやろうとしていた」<br>のが問題だった。</div>
+  </div>
+
+  <!-- 発想の転換 -->
+  <div class="section tenkan">
+    <div class="section-label">💡 発想の転換 / 1:20〜2:40</div>
+    <div class="line">俺がやってることの大半は</div>
+    <div class="line big">「俺じゃなくてもできること」だった。</div>
+    <div class="line">相場の分析、英文の作成、スクリプトの構成——</div>
+    <div class="line green">だったら、丸投げすればいい。</div>
+    <div class="pause">間</div>
+    <div class="line">そこで使い始めたのが</div>
+    <div class="line big cyan">Claude Code</div>
+    <div class="line">チャットじゃなくて</div>
+    <div class="line accent">一緒に仕事をする相棒に近い。</div>
+  </div>
+
+  <!-- 仕組み -->
+  <div class="section shikumi">
+    <div class="section-label">⚙️ 仕組み / 2:40〜4:00</div>
+    <div class="line">CLAUDE.mdというファイルを自動で読む。</div>
+    <div class="line yellow">「Playgicの参謀として動いてくれ」</div>
+    <div class="line">毎回の会話が「続き」として始まる。</div>
+    <div class="line accent">記憶を持った相棒が、毎朝起動してくる感覚。</div>
+    <div class="pause">間</div>
+    <div class="line">投資も同じ仕組みにした。</div>
+    <div class="line">毎朝6時、AIがNASDAQのRSIを分析して</div>
+    <div class="line yellow">買いシグナルが出たらGmailに通知が届く。</div>
+    <div class="line big">俺がやったのは<br>「承認ボタンを押すこと」だけ。</div>
+  </div>
+
+  <!-- 具体的な変化 -->
+  <div class="section change">
+    <div class="section-label">📦 変化 / 4:00〜5:00</div>
+    <div class="line">一番わかりやすい変化はeBay。</div>
+    <div class="line">以前は迷って、調べて、疲れて、買い逃してた。</div>
+    <div class="line">今は写真を1枚送るだけ。</div>
+    <div class="pause">間</div>
+    <div class="num">30秒</div>
+    <div class="line big accent">で答えが返ってくる。</div>
+    <div class="line red">「買え。利益率は約5〜8倍。」</div>
+    <div class="pause">間</div>
+    <div class="line cyan">FF3ファミコン　仕入れ¥2,755</div>
+    <div class="line cyan">eBay出品　$85</div>
+    <div class="line big">判断から出品まで、<br>全部丸投げで動いた。</div>
+  </div>
+
+  <!-- 正直なところ -->
+  <div class="section honest">
+    <div class="section-label">🤝 正直なところ / 5:00〜5:40</div>
+    <div class="line">AIは魔法じゃない。</div>
+    <div class="line">最終判断は自分の仕事だ。</div>
+    <div class="pause">間</div>
+    <div class="line big accent">「考えること」と「実行すること」を<br>分離できる。</div>
+    <div class="line">これが一番大きかった。</div>
+    <div class="pause">間</div>
+    <div class="line">才能とか時間じゃなくて</div>
+    <div class="line">「全部自分でやろうとしている構造」に問題がある。</div>
+    <div class="line big green">仕組みを変える。それだけでいい。</div>
+  </div>
+
+  <!-- CTA -->
+  <div class="section cta">
+    <div class="section-label">📢 CTA / 5:40〜6:00</div>
+    <div class="line cyan">証券担保ローン¥500,000　NASDAQ投資中</div>
+    <div class="line cyan">eBay輸出　30日実験　開始</div>
+    <div class="line">うまくいくかどうか、正直まだわからない。</div>
+    <div class="line accent">でも全部、記録として残していく。</div>
+    <div class="line">綺麗事なし。数字もそのまま出す。</div>
+    <div class="pause">間</div>
+    <div class="line big">チャンネル登録、しておいてくれると助かる。</div>
+    <div class="line">じゃあまた。</div>
+  </div>
+
+</div>
+
+<script>
+let fontSize = 28;
+function changeSize(delta) {
+  fontSize += delta;
+  fontSize = Math.max(16, Math.min(60, fontSize));
+  document.querySelectorAll('.line, .num').forEach(el => {
+    if (el.classList.contains('big')) {
+      el.style.fontSize = (fontSize + 8) + 'px';
+    } else {
+      el.style.fontSize = fontSize + 'px';
+    }
+  });
+}
+
+let dimmed = false;
+function toggleDim() {
+  dimmed = !dimmed;
+  document.body.style.background = dimmed ? '#000' : '#000';
+  document.querySelectorAll('.line, .num').forEach(el => {
+    el.style.opacity = dimmed ? '0.4' : '1';
+  });
+}
+</script>
+</body>
+</html>

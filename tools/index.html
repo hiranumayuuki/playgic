@@ -398,8 +398,7 @@
   <div class="nav-badge">Personal Financial OS</div>
   <div class="nav-right">
     <a href="dashboard.html" class="nav-link" style="color:var(--accent2);font-weight:700;">📊 Dashboard</a>
-    <a href="../website/index.html" class="nav-link">Playgic Home</a>
-    <a href="../youtube/thumbnail_maker.html" class="nav-link">Thumbnail Maker</a>
+    <a href="https://rebelsheepjp.github.io/playgic/" target="_blank" class="nav-link">🌐 Playgic Home</a>
   </div>
 </nav>
 
@@ -504,19 +503,20 @@
   <div class="tools-label">All Tools</div>
   <div class="tools-grid">
 
-    <a href="story.html" class="tool-card">
-      <div class="tool-icon">📖</div>
-      <div class="tool-name">Playgic Story</div>
-      <div class="tool-desc">Playgicの誕生から今日まで。フィロソフィー・チーム・3本柱・ロードマップを一本のストーリーで見る。</div>
+    <!-- 1位: 投資朝レポート -->
+    <a href="investment_report.html" class="tool-card">
+      <div class="tool-icon">📈</div>
+      <div class="tool-name">投資朝レポート</div>
+      <div class="tool-desc">毎朝6時に自動生成。QQQ/SMH/BTC のRSI・マクロ指標・機関投資家動向をルールベースで分析。買いシグナルを通知。</div>
       <div class="tool-outputs">
-        <span class="tool-out-tag">タイムライン</span>
-        <span class="tool-out-tag">哲学</span>
-        <span class="tool-out-tag">チーム</span>
-        <span class="tool-out-tag">未来</span>
+        <span class="tool-out-tag green">毎朝6時 自動送信</span>
+        <span class="tool-out-tag">RSI監視</span>
+        <span class="tool-out-tag">マクロ</span>
       </div>
-      <div class="tool-status ready">▶ ストーリーを読む</div>
+      <div class="tool-status ready">▶ レポートを見る</div>
     </a>
 
+    <!-- 2位: eBay -->
     <a href="ebay.html" class="tool-card">
       <div class="tool-icon">📦</div>
       <div class="tool-name">eBay 利益計算ツール</div>
@@ -529,6 +529,7 @@
       <div class="tool-status ready">▶ 使ってみる</div>
     </a>
 
+    <!-- 3位: 証券担保ローン -->
     <a href="loan.html" class="tool-card">
       <div class="tool-icon">💴</div>
       <div class="tool-name">証券担保ローン シミュレーター</div>
@@ -541,6 +542,20 @@
       <div class="tool-status ready">▶ 使ってみる</div>
     </a>
 
+    <!-- 4位: Keyword Researcher -->
+    <div class="tool-card" onclick="showLaunchModal('researcher')" style="cursor:pointer;">
+      <div class="tool-icon">🔍</div>
+      <div class="tool-name">Keyword Researcher</div>
+      <div class="tool-desc">YouTubeとnoteのキーワードをチャンススコアで分析。競合数・再生数・伸びしろを一画面で比較して、勝てるキーワードを見つける。</div>
+      <div class="tool-outputs">
+        <span class="tool-out-tag">YouTube分析</span>
+        <span class="tool-out-tag">note分析</span>
+        <span class="tool-out-tag green">チャンススコア</span>
+      </div>
+      <div class="tool-status ready">▶ 起動方法を見る</div>
+    </div>
+
+    <!-- 5位: FIRE -->
     <a href="fire.html" class="tool-card">
       <div class="tool-icon">🔥</div>
       <div class="tool-name">FIRE シミュレーター</div>
@@ -553,18 +568,7 @@
       <div class="tool-status ready">▶ 使ってみる</div>
     </a>
 
-    <a href="../youtube/thumbnail_maker.html" class="tool-card">
-      <div class="tool-icon">🎨</div>
-      <div class="tool-name">サムネイルメーカー</div>
-      <div class="tool-desc">Rebel Sheepのブランドに統一されたYouTubeサムネをフォーム入力だけで作成。1280×720 PNGで書き出し。</div>
-      <div class="tool-outputs">
-        <span class="tool-out-tag">PNG書き出し</span>
-        <span class="tool-out-tag">プリセット4種</span>
-        <span class="tool-out-tag">リアルタイム編集</span>
-      </div>
-      <div class="tool-status ready">▶ 使ってみる</div>
-    </a>
-
+    <!-- 6位: 株モン -->
     <a href="kabumon.html" class="tool-card">
       <div class="tool-icon">⚡</div>
       <div class="tool-name">株モン</div>
@@ -577,6 +581,31 @@
       </div>
       <div class="tool-status ready">▶ 使ってみる</div>
     </a>
+
+    <!-- 7位: サムネイルメーカー -->
+    <a href="../youtube/thumbnail_maker.html" class="tool-card">
+      <div class="tool-icon">🎨</div>
+      <div class="tool-name">サムネイルメーカー</div>
+      <div class="tool-desc">Rebel Sheepのブランドに統一されたYouTubeサムネをフォーム入力だけで作成。1280×720 PNGで書き出し。</div>
+      <div class="tool-outputs">
+        <span class="tool-out-tag">PNG書き出し</span>
+        <span class="tool-out-tag">プリセット4種</span>
+        <span class="tool-out-tag">リアルタイム編集</span>
+      </div>
+      <div class="tool-status ready">▶ 使ってみる</div>
+    </a>
+
+    <div class="tool-card" onclick="showLaunchModal('screener')" style="cursor:pointer;">
+      <div class="tool-icon">📈</div>
+      <div class="tool-name">株スクリーナー</div>
+      <div class="tool-desc">成長×モメンタム軸で米国株をスクリーニング。RSI・騰落率・出来高を組み合わせて買いタイミングを判定。バックテスト機能付き。</div>
+      <div class="tool-outputs">
+        <span class="tool-out-tag">RSIフィルター</span>
+        <span class="tool-out-tag">モメンタム</span>
+        <span class="tool-out-tag green">バックテスト</span>
+      </div>
+      <div class="tool-status ready">▶ 起動方法を見る</div>
+    </div>
 
     <div class="tool-card soon">
       <div class="tool-icon">📊</div>
@@ -602,6 +631,24 @@
 
   </div>
 </main>
+
+<!-- モーダル（起動方法）-->
+<div class="modal-overlay" id="launch-modal">
+  <div class="modal">
+    <h2 id="launch-title">ツールの起動方法</h2>
+    <p id="launch-desc"></p>
+    <div style="background:rgba(124,92,252,.08);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;">
+      <div style="font-size:11px;color:var(--gray);margin-bottom:8px;letter-spacing:.05em;">STEP</div>
+      <ol id="launch-steps" style="font-size:13px;color:var(--white);line-height:2;padding-left:18px;"></ol>
+    </div>
+    <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:12px 16px;margin-bottom:24px;">
+      <div style="font-size:12px;color:#10b981;" id="launch-path"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeLaunchModal()">閉じる</button>
+    </div>
+  </div>
+</div>
 
 <!-- モーダル（数字設定）-->
 <div class="modal-overlay" id="modal">
@@ -698,6 +745,46 @@
   });
 
   load();
+
+  const launchInfo = {
+    researcher: {
+      title: '🔍 Keyword Researcher の起動',
+      desc: 'YouTube・noteのキーワードをチャンススコアで分析するローカルツールです。',
+      steps: [
+        'Finderで <code>Desktop/Playgic/scripts/researcher-ui/</code> を開く',
+        '<code>起動.command</code> をダブルクリック',
+        'ブラウザで <code>http://localhost:5001</code> が自動で開く',
+      ],
+      path: '📁 Desktop/Playgic/scripts/researcher-ui/起動.command'
+    },
+    screener: {
+      title: '📈 株スクリーナーの起動',
+      desc: '成長×モメンタム軸で米国株をスクリーニングするローカルツールです。',
+      steps: [
+        'Finderで <code>Desktop/Playgic/scripts/investment-tools/</code> を開く',
+        '<code>起動.command</code> をダブルクリック',
+        'ブラウザで <code>http://localhost:5002</code> が自動で開く',
+      ],
+      path: '📁 Desktop/Playgic/scripts/investment-tools/起動.command'
+    }
+  };
+
+  function showLaunchModal(type) {
+    const info = launchInfo[type];
+    document.getElementById('launch-title').textContent = info.title;
+    document.getElementById('launch-desc').textContent = info.desc;
+    document.getElementById('launch-steps').innerHTML = info.steps.map(s => `<li>${s}</li>`).join('');
+    document.getElementById('launch-path').textContent = info.path;
+    document.getElementById('launch-modal').classList.add('open');
+  }
+
+  function closeLaunchModal() {
+    document.getElementById('launch-modal').classList.remove('open');
+  }
+
+  document.getElementById('launch-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeLaunchModal();
+  });
 </script>
 </body>
 </html>
